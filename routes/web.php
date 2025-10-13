@@ -9,6 +9,7 @@ Route::get('/', function () {
     return Inertia::render('App');
 });
 
+// Endpoint for previewing CSV files
 Route::post('/preview', [PreviewController::class, 'preview'])->name('preview.file');;
 
-Route::get('product/{sku}', [ProductController::class, 'getProductBySku'])->name('product.show');
+require __DIR__.'/api.php';
