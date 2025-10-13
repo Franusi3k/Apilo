@@ -24,7 +24,7 @@
       </div>
       <div class="col-md-3 mb-3">
         <label>Kraj:</label>
-        <input type="text" class="form-control" v-model="invoiceData.country" value="PL" required />
+        <input type="text" class="form-control" v-model="invoiceData.country" required />
       </div>
       <div class="col-md-3 mb-3">
         <label>NIP:</label>
@@ -34,20 +34,20 @@
   </div>
 </template>
 
-<script>
-export default {
-  props: {
-    modelValue: {
-      type: Object,
-      default: () => ({})
-    }
-  },
-  emits: ['update:modelValue'],
-  computed: {
-    invoiceData: {
-      get() { return this.modelValue; },
-      set(value) { this.$emit('update:modelValue', value); }
-    }
+<script setup>
+import { computed } from 'vue'
+
+const props = defineProps({
+  modelValue: {
+    type: Object,
+    default: () => ({})
   }
-};
+})
+
+const emit = defineEmits(['update:modelValue'])
+
+const invoiceData = computed({
+  get: () => props.modelValue,
+  set: (value) => emit('update:modelValue', value)
+})
 </script>

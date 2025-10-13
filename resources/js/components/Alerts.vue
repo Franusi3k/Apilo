@@ -5,13 +5,9 @@
   </div>
 </template>
 
-<script>
-export default {
-  data() {
-    return {
-      errorMessage: '',
-      successMessage: '',
-    };
-  },
-};
+<script setup>
+import { ref } from 'vue'
+
+const errorMessage = ref('')
+const successMessage = ref('')
 </script>

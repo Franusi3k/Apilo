@@ -34,29 +34,35 @@
   </div>
 </template>
 
-<script>
-export default {
-  props: {
-    modelValue: {
-      type: Object,
-      default: () => ({})
-    },
-    invoiceData: {
-      type: Object,
-      default: () => ({})
-    }
+<script setup>
+import { computed } from 'vue'
+
+const props = defineProps({
+  modelValue: {
+    type: Object,
+    default: () => ({})
   },
-  emits: ['update:modelValue'],
-  computed: {
-    shippingData: {
-      get() { return this.modelValue; },
-      set(value) { this.$emit('update:modelValue', value); }
-    }
-  },
-  methods: {
-    copyInvoice() {
-      this.shippingData = { ...this.invoiceData };
-    }
+  invoiceData: {
+    type: Object,
+    default: () => ({})
   }
-};
+})
+
+const emit = defineEmits(['update:modelValue'])
+
+const shippingData = computed({
+  get: () => props.modelValue,
+  set: (value) => emit('update:modelValue', value)
+})
+
+function copyInvoice() {
+  shippingData.value = {
+    company: props.invoiceData.company || '',
+    name: props.invoiceData.name || '',
+    street: props.invoiceData.street || '',
+    postcode: props.invoiceData.postcode || '',
+    city: props.invoiceData.city || '',
+    country: props.invoiceData.country || '',
+  }
+}
 </script>

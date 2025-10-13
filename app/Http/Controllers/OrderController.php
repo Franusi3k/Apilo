@@ -8,6 +8,6 @@ class OrderController extends Controller
 {
     public function send(Request $request)
     {
-        dd($request->all());
+        return response()->json($request->all());
     }
 }

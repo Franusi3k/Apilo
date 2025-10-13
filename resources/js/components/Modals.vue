@@ -57,8 +57,8 @@
         </div>
         <div class="modal-footer">
           <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Anuluj</button>
-          <button type="button" class="btn btn-success" @click="$emit('continue-available')">✅ Tylko dostępne</button>
-          <button type="button" class="btn btn-warning" @click="$emit('continue-all')">⚠️ Kontynuuj mimo braków</button>
+          <button type="button" class="btn btn-success" @click="emit('continue-available')">✅ Tylko dostępne</button>
+          <button type="button" class="btn btn-warning" @click="emit('continue-all')">⚠️ Kontynuuj mimo braków</button>
         </div>
       </div>
     </div>
@@ -83,21 +83,20 @@
         </div>
         <div class="modal-footer">
           <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Anuluj</button>
-          <button type="button" class="btn btn-success" @click="$emit('continue-with-found')">✅ Kontynuuj bez brakujących</button>
+          <button type="button" class="btn btn-success" @click="emit('continue-with-found')">✅ Kontynuuj bez brakujących</button>
         </div>
       </div>
     </div>
   </div>
 </template>
 
-<script>
-export default {
-  props: {
-    previewData: { type: Array, default: () => [] },
-    lowStockList: { type: Array, default: () => [] },
-    missingProducts: { type: Array, default: () => [] },
-    missingMessage: { type: String, default: '' }
-  },
-  emits: ['continue-available', 'continue-all', 'continue-with-found']
-};
+<script setup>
+const props = defineProps({
+  previewData: { type: Array, default: () => [] },
+  lowStockList: { type: Array, default: () => [] },
+  missingProducts: { type: Array, default: () => [] },
+  missingMessage: { type: String, default: '' }
+})
+
+const emit = defineEmits(['continue-available', 'continue-all', 'continue-with-found'])
 </script>

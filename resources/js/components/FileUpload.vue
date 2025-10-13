@@ -7,12 +7,10 @@
   </div>
 </template>
 
-<script>
-export default {
-  methods: {
-    onFileChange(event) {
-      this.$emit('file-selected', event.target.files[0]);
-    },
-  },
-};
+<script setup>
+const emit = defineEmits(['file-selected', 'preview'])
+
+function onFileChange(event) {
+  emit('file-selected', event.target.files[0])
+}
 </script>

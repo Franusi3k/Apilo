@@ -20,6 +20,7 @@
         "@inertiajs/inertia-vue3": "^0.6.0",
         "@popperjs/core": "^2.11.8",
         "bootstrap": "^5.3.8",
-        "vue": "^3.5.22"
+        "vue": "^3.5.22",
+        "ziggy-js": "^2.6.0"
     }
 }
