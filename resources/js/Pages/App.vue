@@ -8,9 +8,9 @@ h1 { color: teal; }
 
     <Alerts />
 
-    <OrderForm />
+    <OrderForm @preview="handlePreview"/>
     
-    <Modals />
+    <Modals :preview-data="previewData" />
   </div>
 </template>
 
@@ -18,4 +18,27 @@ h1 { color: teal; }
 import OrderForm from '../components/OrderForm.vue'
 import Modals from '../components/Modals.vue'
 import Alerts from '../components/Alerts.vue'
+import { ref } from 'vue'
+import axios from 'axios'
+import { Modal } from 'bootstrap'
+
+const previewData = ref([])
+
+const handlePreview = async (file) => {
+  try {
+    const formData = new FormData()
+    formData.append('excel_file', file)
+
+    const { data } = await axios.post(route('preview.file'), formData, {
+      headers: { 'Content-Type': 'multipart/form-data' },
+    })
+
+    previewData.value = data 
+
+    const modal = new Modal(document.getElementById('filePreviewModal'))
+    modal.show()
+  } catch (e) {
+    console.error(e)
+  }
+}
 </script>
