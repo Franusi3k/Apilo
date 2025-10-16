@@ -18,20 +18,31 @@ class ApiloService
                 ->get(config('apilo.base_url') . 'rest/api/warehouse/product', ['sku' => $sku]);
 
             if ($response->status() !== 200) {
-                return [null, "Produkt $sku nie znaleziony: " . $response->body()];
+                return [
+                    'status' => 'error',
+                    'message' => "Produkt $sku nie znaleziony: " . $response->body(),
+                    'data' => null
+                ];
             }
 
             $data = $response->json();
             $products = $data['products'] ?? [];
 
             if (empty($products)) {
-                return [null, "Brak produktu dla SKU $sku"];
+                return [
+                    'status' => 'error',
+                    'message' => 'Brak produktu dla SKU ' . $sku,
+                    'data' => null
+                ];
             }
 
-            return [$products[0], null];
-
+            return ['status' => 'success', 'message' => 'Pomyślnie pobrano produkt na podstawie SKU', 'data' => $products[0]];
         } catch (\Exception $e) {
-            return [null, "Wyjątek dla $sku: " . $e->getMessage()];
+            return [
+                'status' => 'error',
+                'message' => "Exception while fetching {$sku}: " . $e->getMessage(),
+                'data' => null,
+            ];
         }
     }
 }

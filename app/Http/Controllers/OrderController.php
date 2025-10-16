@@ -2,12 +2,29 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
+use App\Http\Requests\SendOrderRequest;
+use App\Services\Apilo\OrderService;
 
 class OrderController extends Controller
 {
-    public function send(Request $request)
+    protected OrderService $orderService;
+
+    public function __construct(OrderService $orderService)
     {
-        return response()->json($request->all());
+        $this->orderService = $orderService;
+    }
+
+
+    public function send(SendOrderRequest $request)
+    {
+        $response = $this->orderService->sendOrder(
+            $request->generalData,
+            $request->invoiceData,
+            $request->shippingData,
+            $request->file('file'),
+            $request->notes,
+        );
+
+        return response()->json($response, $response['status_code'] ?? 200);
     }
 }
