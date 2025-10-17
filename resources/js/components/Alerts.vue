@@ -6,8 +6,8 @@
 </template>
 
 <script setup>
-import { ref } from 'vue'
-
-const errorMessage = ref('')
-const successMessage = ref('')
+defineProps({
+  errorMessage: String,
+  successMessage: String
+})
 </script>

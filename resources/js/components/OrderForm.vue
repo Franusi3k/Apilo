@@ -28,7 +28,7 @@ import GeneralData from './GeneralData.vue'
 import InvoiceData from './InvoiceData.vue'
 import ShippingData from './ShippingData.vue'
 
-const emit = defineEmits(['preview'])
+const emit = defineEmits(['preview', 'success', 'error'])
 
 const file = ref(null)
 const generalData = ref({
@@ -62,6 +62,7 @@ const temp = ref('')
 
 const submitForm = async () => {
   try {
+    emit('error', '')
     const formData = new FormData()
     if (file.value) formData.append('file', file.value)
     formData.append('generalData', JSON.stringify(generalData.value))
@@ -69,14 +70,18 @@ const submitForm = async () => {
     formData.append('shippingData', JSON.stringify(shippingData.value))
     formData.append('notes', notes.value)
 
-    const response = await axios.post(route('api.order.send'), formData, {
+    const { data } = await axios.post(route('api.order.send'), formData, {
       headers: { 'Content-Type': 'multipart/form-data' },
     })
 
-    temp.value = response.data
+    if (data.status === 'success') {
+      emit('success', data.message)
+    } else {
+      emit('error', data.message)
+    }
 
   } catch (e) {
-    console.error(e);
+    emit('error', e.response?.data?.message || 'Wystąpił nieoczekiwany błąd.')
   }
 }
 

@@ -6,10 +6,10 @@ h1 { color: teal; }
   <div class="container py-4">
     <h1 class="mb-4">🧾 Import zamówień do Apilo</h1>
 
-    <Alerts />
-
-    <OrderForm @preview="handlePreview"/>
+    <Alerts :error-message="errorMessage" :success-message="successMessage" />
     
+    <OrderForm @preview="handlePreview" @success="showSuccess" @error="showError" />
+
     <Modals :preview-data="previewData" />
   </div>
 </template>
@@ -22,6 +22,19 @@ import { ref } from 'vue'
 import axios from 'axios'
 import { Modal } from 'bootstrap'
 
+const successMessage = ref('')
+const errorMessage = ref('')
+
+const showSuccess = (msg) => {
+  successMessage.value = msg
+  errorMessage.value = ''
+}
+
+const showError = (msg) => {
+  errorMessage.value = msg
+  successMessage.value = ''
+}
+
 const previewData = ref([])
 
 const handlePreview = async (file) => {
@@ -33,7 +46,7 @@ const handlePreview = async (file) => {
       headers: { 'Content-Type': 'multipart/form-data' },
     })
 
-    previewData.value = data 
+    previewData.value = data
 
     const modal = new Modal(document.getElementById('filePreviewModal'))
     modal.show()
