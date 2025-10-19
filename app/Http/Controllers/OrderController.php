@@ -23,6 +23,7 @@ class OrderController extends Controller
             $request->shippingData,
             $request->file('file'),
             $request->notes,
+            $request
         );
 
         return response()->json($response, $response['status_code'] ?? 200);

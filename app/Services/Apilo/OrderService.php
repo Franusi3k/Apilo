@@ -9,20 +9,33 @@ use Illuminate\Support\Facades\Http;
 use Exception;
 use Illuminate\Support\Collection;
 
-class OrderService 
+class OrderService
 {
     protected PreviewService $previewService;
     protected ApiloService $apiloService;
     protected ApiloClient $apiloClient;
+    protected StockCheckService $stockCheckService;
 
-    public function __construct(PreviewService $previewService, ApiloService $apiloService, ApiloClient $apiloClient)
-    {
+    public function __construct(
+        PreviewService $previewService,
+        ApiloService $apiloService,
+        ApiloClient $apiloClient,
+        StockCheckService $stockCheckService
+    ) {
         $this->previewService = $previewService;
         $this->apiloService = $apiloService;
         $this->apiloClient = $apiloClient;
+        $this->stockCheckService = $stockCheckService;
     }
 
-    public function sendOrder($generalDataJson, $invoiceDataJson, $shippingDataJson, $file, $notes = null): array
+    public function sendOrder(
+        $generalDataJson,
+        $invoiceDataJson,
+        $shippingDataJson,
+        $file,
+        $notes = null,
+        $request = null
+        ): array
     {
         try {
             $generalData = json_decode($generalDataJson, true);
@@ -30,6 +43,18 @@ class OrderService
             $shippingData = json_decode($shippingDataJson, true);
 
             $products = $this->previewService->parseCsv($file);
+
+            $stockResult = $this->handleStockCheck(
+                $products->toArray(),
+                $request->boolean('ignore_missing_sku') ?? false,
+                $request->boolean('confirmed_only') ?? false,
+                $request->boolean('ignore_low_stock' ?? false)
+            );
+            if ($stockResult['status'] !== 'success') {
+                return $stockResult;
+            }
+
+            $products = collect($stockResult['products']);
 
             $discount = (float) ($generalData['discount'] ?? 0.00) / 100.0;
             $vat = (float) ($generalData['vat'] ?? 0.00) / 100.0;
@@ -94,21 +119,21 @@ class OrderService
             if ($response->successful()) {
                 return [
                     'status' => 'success',
-                    'message' => 'Order sent successfully',
+                    'message' => 'Pomyślnie wysłano zamówienie',
                     'data' => $response->json(),
                     'status_code' => $response->status(),
                 ];
             }
             return [
                 'status' => 'error',
-                'message' => 'Failed to send order: ' . $response->body(),
+                'message' => 'Błąd podczas wysyłania zamówienia: ' . $response->body(),
                 'data' => [],
                 'status_code' => $response->status(),
             ];
-        } catch(Exception $ex){
+        } catch (Exception $ex) {
             return [
                 'status' => 'error',
-                'message' => 'Unexpected error: ' . $ex->getMessage(),
+                'message' => 'Niespodziewany błąd: ' . $ex->getMessage(),
                 'data' => [],
                 'status_code' => 500,
             ];
@@ -247,6 +272,49 @@ class OrderService
             ],
             "orderedAt" => $orderedAt,
             "status" => 42,
+        ];
+    }
+
+    private function handleStockCheck(array $products, $ignoreMissingSku, $confirmedOnly, $ignoreLowStock): array
+    {
+        $stockCheck = $this->stockCheckService->processProductsWithStockCheck($products);
+
+        $confirmed = $stockCheck['confirmed'];
+        $toConfirm = $stockCheck['toConfirm'];
+        $notFound = $stockCheck['notFound'];
+
+        if (!empty($notFound) && !$ignoreMissingSku) {
+            return [
+                'status' => 'warning',
+                'message' => 'Nie znaleziono części produktów po SKU.',
+                'data' => ['notFound' => $notFound],
+                'status_code' => 409,
+            ];
+        }
+
+        if (!empty($toConfirm)) {
+            if ($confirmedOnly) {
+                $products = $confirmed;
+            } elseif ($ignoreLowStock) {
+                $products = array_merge($confirmed, $toConfirm);
+            } else {
+                return [
+                    'status' => 'warning',
+                    'message' => 'Niektóre produkty mają zbyt mały stan magazynowy.',
+                    'data' => [
+                        'missingProducts' => $toConfirm,
+                        'confirmedProducts' => $confirmed,
+                    ],
+                    'status_code' => 409,
+                ];
+            }
+        } else {
+            $products = $confirmed;
+        }
+
+        return [
+            'status' => 'success',
+            'products' => $products,
         ];
     }
 }
