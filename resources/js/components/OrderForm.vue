@@ -82,9 +82,9 @@ const submitForm = async (ignoreMissingSku = false) => {
     const res = e.response?.data
     emit('error', res.message || 'Wystąpił nieoczekiwany błąd.')
 
-    if (res?.data?.missingProducts) {
+    if (res?.data?.notFound) {
       emit('missing-products', {
-        missingProducts: res.data.missingProducts,
+        missingProducts: res.data.notFound,
         message: res.message
       })
     }
