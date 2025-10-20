@@ -1,5 +1,5 @@
 <template>
-  <form class="bg-white p-4 shadow-sm rounded-3 mb-5" @submit.prevent="submitForm">
+  <form class="bg-white p-4 shadow-sm rounded-3 mb-5" @submit.prevent="submitForm()" >
     <FileUpload @file-selected="file = $event" @preview="emit('preview', file)" />
 
     <GeneralData v-model="generalData" />
@@ -16,8 +16,6 @@
     </div>
   </form>
 
-  {{ temp }}
-
 </template>
 
 <script setup>
@@ -28,7 +26,8 @@ import GeneralData from './GeneralData.vue'
 import InvoiceData from './InvoiceData.vue'
 import ShippingData from './ShippingData.vue'
 
-const emit = defineEmits(['preview', 'success', 'error'])
+const emit = defineEmits(['preview', 'success', 'error', 'missing-products'])
+
 
 const file = ref(null)
 const generalData = ref({
@@ -58,9 +57,7 @@ const shippingData = ref({
 })
 const notes = ref('')
 
-const temp = ref('')
-
-const submitForm = async () => {
+const submitForm = async (ignoreMissingSku = false) => {
   try {
     emit('error', '')
     const formData = new FormData()
@@ -69,6 +66,7 @@ const submitForm = async () => {
     formData.append('invoiceData', JSON.stringify(invoiceData.value))
     formData.append('shippingData', JSON.stringify(shippingData.value))
     formData.append('notes', notes.value)
+    formData.append('ignore_missing_sku', ignoreMissingSku)
 
     const { data } = await axios.post(route('api.order.send'), formData, {
       headers: { 'Content-Type': 'multipart/form-data' },
@@ -81,8 +79,21 @@ const submitForm = async () => {
     }
 
   } catch (e) {
-    emit('error', e.response?.data?.message || 'Wystąpił nieoczekiwany błąd.')
+    const res = e.response?.data
+    emit('error', res.message || 'Wystąpił nieoczekiwany błąd.')
+
+    if (res?.data?.missingProducts) {
+      emit('missing-products', {
+        missingProducts: res.data.missingProducts,
+        message: res.message
+      })
+    }
+    console.error(e);
   }
 }
+
+defineExpose({
+  submitForm
+})
 
 </script>

@@ -75,8 +75,8 @@
         <div class="modal-body">
           <p>{{ missingMessage }}</p>
           <ul class="list-group mb-3">
-            <li v-for="(prod, i) in missingProducts" :key="i" class="list-group-item">
-              SKU: {{ prod.sku }} – {{ prod.reason }}
+            <li v-for="(prod, i) in missingProducts" :key="i" class="list-group-item fw-bolder">
+              SKU: {{ prod.product.sku }}
             </li>
           </ul>
           <p>Chcesz kontynuować zamówienie bez tych produktów?</p>

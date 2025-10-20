@@ -7,10 +7,10 @@ h1 { color: teal; }
     <h1 class="mb-4">🧾 Import zamówień do Apilo</h1>
 
     <Alerts :error-message="errorMessage" :success-message="successMessage" />
-    
-    <OrderForm @preview="handlePreview" @success="showSuccess" @error="showError" />
+  
+    <OrderForm @preview="handlePreview" @success="showSuccess" @error="showError" @missing-products="showMissingProductsModal" ref="orderForm"/>
 
-    <Modals :preview-data="previewData" />
+    <Modals :preview-data="previewData" :missing-message="missingMessage" :missing-products="missingProducts" @continue-with-found="handleContinueWithoutMissing" />
   </div>
 </template>
 
@@ -53,5 +53,22 @@ const handlePreview = async (file) => {
   } catch (e) {
     console.error(e)
   }
+}
+
+const missingProducts = ref([])
+const missingMessage = ref('')
+
+const showMissingProductsModal = (data) => {
+  missingProducts.value = data.missingProducts
+  missingMessage.value = data.message
+
+  const modal = new Modal(document.getElementById('missingProductsModal'))
+  modal.show()
+}
+
+const orderForm = ref(null)
+
+const handleContinueWithoutMissing = () => {
+  orderForm.value.submitForm(true);
 }
 </script>
