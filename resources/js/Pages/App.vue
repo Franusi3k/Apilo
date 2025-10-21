@@ -8,9 +8,9 @@ h1 { color: teal; }
 
     <Alerts :error-message="errorMessage" :success-message="successMessage" />
   
-    <OrderForm @preview="handlePreview" @success="showSuccess" @error="showError" @missing-products="showMissingProductsModal" ref="orderForm"/>
+    <OrderForm @preview="handlePreview" @success="showSuccess" @error="showError" @missing-products="showMissingProductsModal" @lowStockList="showLowStockListModal" ref="orderForm"/>
 
-    <Modals :preview-data="previewData" :missing-message="missingMessage" :missing-products="missingProducts" @continue-with-found="handleContinueWithoutMissing" />
+    <Modals :preview-data="previewData" :missing-message="missingMessage" :missing-products="missingProducts" @continue-with-found="handleContinueWithoutMissing" @continue-available="handleContinueAvailable" @continue-all="handleContinueAll" :lowStockList="lowStockList"/>
   </div>
 </template>
 
@@ -71,4 +71,21 @@ const orderForm = ref(null)
 const handleContinueWithoutMissing = () => {
   orderForm.value.submitForm(true);
 }
+
+const lowStockList = ref([])
+
+const showLowStockListModal = (data) => {
+  lowStockList.value = data
+
+  const modal = new Modal(document.getElementById('lowStockModal'))
+  modal.show()
+}
+
+const handleContinueAvailable = () => {
+  orderForm.value.submitForm(true, true, false);
+}
+const handleContinueAll = () => {
+  orderForm.value.submitForm(true, false, true);
+}
+
 </script>

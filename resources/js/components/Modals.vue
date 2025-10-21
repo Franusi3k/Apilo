@@ -57,8 +57,8 @@
         </div>
         <div class="modal-footer">
           <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Anuluj</button>
-          <button type="button" class="btn btn-success" @click="emit('continue-available')">✅ Tylko dostępne</button>
-          <button type="button" class="btn btn-warning" @click="emit('continue-all')">⚠️ Kontynuuj mimo braków</button>
+          <button type="button" class="btn btn-success" @click="emit('continue-available')" data-bs-dismiss="modal">✅ Tylko dostępne</button>
+          <button type="button" class="btn btn-warning" @click="emit('continue-all')" data-bs-dismiss="modal">⚠️ Kontynuuj mimo braków</button>
         </div>
       </div>
     </div>
@@ -83,7 +83,7 @@
         </div>
         <div class="modal-footer">
           <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Anuluj</button>
-          <button type="button" class="btn btn-success" @click="emit('continue-with-found')">✅ Kontynuuj bez brakujących</button>
+          <button type="button" class="btn btn-success" @click="emit('continue-with-found')" data-bs-dismiss="modal">✅ Kontynuuj bez brakujących</button>
         </div>
       </div>
     </div>

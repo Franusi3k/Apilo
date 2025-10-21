@@ -26,7 +26,7 @@ import GeneralData from './GeneralData.vue'
 import InvoiceData from './InvoiceData.vue'
 import ShippingData from './ShippingData.vue'
 
-const emit = defineEmits(['preview', 'success', 'error', 'missing-products'])
+const emit = defineEmits(['preview', 'success', 'error', 'missing-products', 'lowStockList'])
 
 
 const file = ref(null)
@@ -57,7 +57,7 @@ const shippingData = ref({
 })
 const notes = ref('')
 
-const submitForm = async (ignoreMissingSku = false) => {
+const submitForm = async (ignoreMissingSku = false, confirmed_only = false, ignore_low_stock = false) => {
   try {
     emit('error', '')
     const formData = new FormData()
@@ -67,10 +67,14 @@ const submitForm = async (ignoreMissingSku = false) => {
     formData.append('shippingData', JSON.stringify(shippingData.value))
     formData.append('notes', notes.value)
     formData.append('ignore_missing_sku', ignoreMissingSku)
+    formData.append('confirmed_only', confirmed_only)
+    formData.append('ignore_low_stock', ignore_low_stock)
 
     const { data } = await axios.post(route('api.order.send'), formData, {
       headers: { 'Content-Type': 'multipart/form-data' },
     })
+
+    console.log(data);
 
     if (data.status === 'success') {
       emit('success', data.message)
@@ -87,6 +91,10 @@ const submitForm = async (ignoreMissingSku = false) => {
         missingProducts: res.data.notFound,
         message: res.message
       })
+    }
+
+    if (res?.data?.confirmedProducts) {
+      emit('lowStockList', res.data.confirmedProducts);
     }
     console.error(e);
   }
