@@ -50,7 +50,7 @@
           <p>Niektóre produkty mają za małą ilość na magazynie:</p>
           <ul class="list-group mb-3">
             <li v-for="(item, i) in lowStockList" :key="i" class="list-group-item">
-              Produkt: {{ item.name }} – brak {{ item.missing_quantity }} szt.
+              Produkt: {{ item.product.name }} – brak {{ item.missing_quantity }} szt.
             </li>
           </ul>
           <p>Wybierz sposób kontynuacji:</p>
