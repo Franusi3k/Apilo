@@ -1,19 +1,20 @@
 <?php
 
-#here will be logic to process order
-
 namespace App\Services\Apilo;
 
 use App\Services\PreviewService;
-use Illuminate\Support\Facades\Http;
 use Exception;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\Http;
 
 class OrderService
 {
     protected PreviewService $previewService;
+
     protected ApiloService $apiloService;
+
     protected ApiloClient $apiloClient;
+
     protected StockCheckService $stockCheckService;
 
     public function __construct(
@@ -35,8 +36,7 @@ class OrderService
         $file,
         $notes = null,
         $request = null
-        ): array
-    {
+    ): array {
         try {
             $generalData = json_decode($generalDataJson, true);
             $invoiceData = json_decode($invoiceDataJson, true);
@@ -84,7 +84,7 @@ class OrderService
 
             $carrierAccountId = $CARRIER_MAP[$generalData['deliveryMethod']] ?? null;
 
-            if (!$carrierAccountId) {
+            if (! $carrierAccountId) {
                 return [
                     'status' => 'error',
                     'message' => 'Nieobsługiwana metoda dostawy',
@@ -114,7 +114,7 @@ class OrderService
             );
 
             $response = Http::withHeaders($this->apiloClient->headers())
-                ->post(config('apilo.base_url') . 'rest/api/orders/', $payload);
+                ->post(config('apilo.base_url').'rest/api/orders/', $payload);
 
             if ($response->successful()) {
                 return [
@@ -124,16 +124,17 @@ class OrderService
                     'status_code' => $response->status(),
                 ];
             }
+
             return [
                 'status' => 'error',
-                'message' => 'Błąd podczas wysyłania zamówienia: ' . $response->body(),
+                'message' => 'Błąd podczas wysyłania zamówienia: '.$response->body(),
                 'data' => [],
                 'status_code' => $response->status(),
             ];
         } catch (Exception $ex) {
             return [
                 'status' => 'error',
-                'message' => 'Niespodziewany błąd: ' . $ex->getMessage(),
+                'message' => 'Niespodziewany błąd: '.$ex->getMessage(),
                 'data' => [],
                 'status_code' => 500,
             ];
@@ -149,53 +150,50 @@ class OrderService
 
         foreach ($products as $row) {
             try {
-                $qty = (int) ($row['quantity'] ?? 0);
-                $netPriceStr = $row['netto'] ?? '0';
+                $product = $row['product'] ?? [];
+                $csv = $row['csv_data'] ?? [];
+
+                $qty = (int) ($csv['quantity'] ?? 0);
+
+                $netPriceStr = $csv['netto'] ?? '0';
                 $netPrice = parsePrice($netPriceStr);
-                $sku = trim($row['sku'] ?? '');
-                $name = trim($row['name'] ?? '');
 
-                if (empty($sku)) {
-                    $errors[] = "Brak SKU dla produktu: {$name}";
-                    continue;
-                }
-
-                if ($qty <= 0) {
-                    $errors[] = "Nieprawidłowa ilość dla produktu: {$name} (SKU: {$sku})";
-                    continue;
-                }
-
-                $productResponse = $this->apiloService->fetchProductBySku($sku);
-
-                if ($productResponse['status'] !== 'success') {
-                    $errors[] = "Produkt nie znaleziony dla SKU: {$sku}";
-                    continue;
-                }
-
-                $product = $productResponse['data'];
-
-                $discountedNet = $netPrice * (1 - $discount);
-                $discountedGross = $discountedNet * (1 + $vat);
-
-                $totalNet += $discountedNet * $qty;
-                $totalGross += $discountedGross * $qty;
-
-                $items[] = [
-                    'id' => $product['id'] ?? '',
-                    'ean' => $product['ean'] ?? '',
-                    'originalCode' => $product['originalCode'] ?? '',
-                    'sku' => $sku,
-                    'originalName' => $name,
-                    'originalPriceWithTax' => round($discountedGross, 2),
-                    'originalPriceWithoutTax' => round($discountedNet, 2),
-                    'quantity' => $qty,
-                    'tax' => number_format($vat * 100, 2),
-                    'type' => '1',
-                    'unit' => $product['unit'] ?? 'szt.',
-                ];
-            } catch (Exception $e) {
+                $sku = trim($product['sku']) ?? '';
+                $name = trim($product['name'] ?? '');
+            } catch (\Throwable $e) {
                 $errors[] = "Błąd przetwarzania produktu: {$e->getMessage()}";
             }
+
+            if ($sku === '') {
+                $errors[] = "Brak SKU dla produktu: {$name}";
+
+                continue;
+            }
+            if ($qty <= 0) {
+                $errors[] = "Nieprawidłowa ilość dla produktu: {$name} (SKU: {$sku})";
+
+                continue;
+            }
+
+            $discountedNet = $netPrice * (1 - $discount);
+            $discountedGross = $discountedNet * (1 + $vat);
+
+            $totalNet += $discountedNet * $qty;
+            $totalGross += $discountedGross * $qty;
+
+            $items[] = [
+                'id' => $product['id'] ?? null,
+                'ean' => $product['ean'] ?? null,
+                'originalCode' => $product['originalCode'] ?? null,
+                'sku' => $sku,
+                'originalName' => $name,
+                'originalPriceWithTax' => round($discountedGross, 2),
+                'originalPriceWithoutTax' => round($discountedNet, 2),
+                'quantity' => $qty,
+                'tax' => number_format($vat * 100, 2),
+                'type' => '1',
+                'unit' => $product['unit'] ?? 'szt.',
+            ];
         }
 
         return [$items, $totalNet, $totalGross, $errors];
@@ -217,61 +215,61 @@ class OrderService
         string $orderedAt
     ): array {
         return [
-            "platformId" => config('apilo.platform_id'),
-            "idExternal" => 'WWW/' . now()->format('YmdHis'),
-            "isInvoice" => true,
-            "customerLogin" => $generalData['client'] ?? 'unknown',
-            "paymentStatus" => 2,
-            "paymentType" => 1,
-            "originalCurrency" => "PLN",
-            "originalAmountTotalWithoutTax" => round($totalNet, 2),
-            "originalAmountTotalWithTax" => round($totalGross, 2),
-            "originalAmountTotalPaid" => round($totalGross, 2),
-            "preferences" => [],
-            "orderItems" => $items,
-            "addressCustomer" => [
-                "name" => $invoiceData['name'] ?? '',
-                "phone" => $generalData['phone'] ?? '',
-                "email" => "shipping@zentrada.com",
-                "streetName" => $invoiceStreetName,
-                "streetNumber" => $invoiceStreetNumber,
-                "city" => $invoiceData['city'] ?? '',
-                "zipCode" => $invoiceData['postcode'] ?? '',
-                "country" => $invoiceData['country'] ?? '',
-                "companyTaxNumber" => $invoiceData['taxNumber'] ?? '',
-                "companyName" => $invoiceData['company'] ?? '',
+            'platformId' => config('apilo.platform_id'),
+            'idExternal' => 'WWW/'.now()->format('YmdHis'),
+            'isInvoice' => true,
+            'customerLogin' => $generalData['client'] ?? 'unknown',
+            'paymentStatus' => 2,
+            'paymentType' => 1,
+            'originalCurrency' => 'PLN',
+            'originalAmountTotalWithoutTax' => round($totalNet, 2),
+            'originalAmountTotalWithTax' => round($totalGross, 2),
+            'originalAmountTotalPaid' => round($totalGross, 2),
+            'preferences' => [],
+            'orderItems' => $items,
+            'addressCustomer' => [
+                'name' => $invoiceData['name'] ?? '',
+                'phone' => $generalData['phone'] ?? '',
+                'email' => 'shipping@zentrada.com',
+                'streetName' => $invoiceStreetName,
+                'streetNumber' => $invoiceStreetNumber,
+                'city' => $invoiceData['city'] ?? '',
+                'zipCode' => $invoiceData['postcode'] ?? '',
+                'country' => $invoiceData['country'] ?? '',
+                'companyTaxNumber' => $invoiceData['taxNumber'] ?? '',
+                'companyName' => $invoiceData['company'] ?? '',
             ],
-            "addressDelivery" => [
-                "name" => $shippingData['name'] ?? '',
-                "phone" => $generalData['phone'] ?? '',
-                "email" => "shipping@zentrada.com",
-                "streetName" => $shippingStreetName,
-                "streetNumber" => $shippingStreetNumber,
-                "city" => $shippingData['city'] ?? '',
-                "zipCode" => $shippingData['postcode'] ?? '',
-                "country" => $shippingData['country'] ?? '',
-                "companyName" => $shippingData['company'] ?? '',
+            'addressDelivery' => [
+                'name' => $shippingData['name'] ?? '',
+                'phone' => $generalData['phone'] ?? '',
+                'email' => 'shipping@zentrada.com',
+                'streetName' => $shippingStreetName,
+                'streetNumber' => $shippingStreetNumber,
+                'city' => $shippingData['city'] ?? '',
+                'zipCode' => $shippingData['postcode'] ?? '',
+                'country' => $shippingData['country'] ?? '',
+                'companyName' => $shippingData['company'] ?? '',
             ],
-            "addressInvoice" => [
-                "name" => $invoiceData['name'] ?? '',
-                "phone" => $generalData['phone'] ?? '',
-                "email" => "shipping@zentrada.com",
-                "streetName" => $invoiceStreetName,
-                "streetNumber" => $invoiceStreetNumber,
-                "city" => $invoiceData['city'] ?? '',
-                "zipCode" => $invoiceData['postcode'] ?? '',
-                "country" => $invoiceData['country'] ?? '',
-                "companyName" => $invoiceData['company'] ?? '',
+            'addressInvoice' => [
+                'name' => $invoiceData['name'] ?? '',
+                'phone' => $generalData['phone'] ?? '',
+                'email' => 'shipping@zentrada.com',
+                'streetName' => $invoiceStreetName,
+                'streetNumber' => $invoiceStreetNumber,
+                'city' => $invoiceData['city'] ?? '',
+                'zipCode' => $invoiceData['postcode'] ?? '',
+                'country' => $invoiceData['country'] ?? '',
+                'companyName' => $invoiceData['company'] ?? '',
             ],
-            "carrierAccount" => $carrierAccountId,
-            "orderNotes" => [
+            'carrierAccount' => $carrierAccountId,
+            'orderNotes' => [
                 [
-                    "type" => "1",
-                    "comment" => $notes,
-                ]
+                    'type' => '1',
+                    'comment' => $notes,
+                ],
             ],
-            "orderedAt" => $orderedAt,
-            "status" => 42,
+            'orderedAt' => $orderedAt,
+            'status' => 42,
         ];
     }
 
@@ -283,7 +281,7 @@ class OrderService
         $toConfirm = $stockCheck['toConfirm'];
         $notFound = $stockCheck['notFound'];
 
-        if (!empty($notFound) && !$ignoreMissingSku) {
+        if (! empty($notFound) && ! $ignoreMissingSku) {
             return [
                 'status' => 'warning',
                 'message' => 'Nie znaleziono części produktów po SKU.',
@@ -292,7 +290,7 @@ class OrderService
             ];
         }
 
-        if (!empty($toConfirm)) {
+        if (! empty($toConfirm)) {
             if ($confirmedOnly) {
                 $products = $confirmed;
             } elseif ($ignoreLowStock) {
