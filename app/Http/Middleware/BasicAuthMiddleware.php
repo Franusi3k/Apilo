@@ -21,7 +21,7 @@ class BasicAuthMiddleware
         $user = $request->getUser();
         $pass = $request->getPassword();
 
-        if ($user !== $USERNAME || !hash_equals($PASSWORD, hash("sha256", $pass))) {
+        if ($user !== $USERNAME || ! hash_equals($PASSWORD, hash('sha256', $pass))) {
             return response('Zaloguj się żeby korzystać ze strony', 401, [
                 'WWW-Authenticate' => 'Basic realm="Apilo Access"',
             ]);

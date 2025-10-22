@@ -28,7 +28,7 @@ class SendOrderRequest extends FormRequest
 
             'notes' => 'nullable|string',
 
-            'file' => 'required|file|mimes:csv,txt,xlsx|max:10240', 
+            'file' => 'required|file|mimes:csv,txt,xlsx|max:10240',
         ];
     }
 

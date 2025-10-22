@@ -14,7 +14,6 @@ class OrderController extends Controller
         $this->orderService = $orderService;
     }
 
-
     public function send(SendOrderRequest $request)
     {
         $response = $this->orderService->sendOrder(

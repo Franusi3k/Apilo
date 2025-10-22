@@ -19,16 +19,17 @@ class PreviewController extends Controller
     {
         $file = $request->file('excel_file');
 
-        if (!$file) {
+        if (! $file) {
             return response()->json(['error' => 'Brak pliku'], 400);
         }
 
         try {
             $records = $this->previewService->parseCsv($file);
+
             return response()->json($records);
         } catch (Exception $e) {
             return response()->json([
-                'error' => 'Błąd przetwarzania pliku: ' . $e->getMessage(),
+                'error' => 'Błąd przetwarzania pliku: '.$e->getMessage(),
             ], 500);
         }
     }

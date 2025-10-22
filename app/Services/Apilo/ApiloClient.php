@@ -19,7 +19,7 @@ class ApiloClient
     public function headers(): array
     {
         return [
-            'Authorization' => 'Bearer ' . $this->token,
+            'Authorization' => 'Bearer '.$this->token,
             'Accept' => 'application/json',
             'Content-Type' => 'application/json',
         ];

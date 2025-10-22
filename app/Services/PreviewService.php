@@ -3,7 +3,6 @@
 namespace App\Services;
 
 use League\Csv\Reader;
-use League\Csv\Exception;
 
 class PreviewService
 {
@@ -22,6 +21,7 @@ class PreviewService
         return collect($allRecords)
             ->map(function ($row) {
                 $cols = array_values($row);
+
                 return [
                     'name' => isset($cols[1]) ? mb_convert_encoding($cols[1], 'UTF-8', 'auto') : '',
                     'quantity' => isset($cols[4]) ? mb_convert_encoding($cols[4], 'UTF-8', 'auto') : '',
@@ -43,6 +43,7 @@ class PreviewService
         }
 
         arsort($counts);
+
         return key($counts);
     }
 }

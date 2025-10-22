@@ -32,6 +32,7 @@ class StockCheckService
                     'sku' => null,
                     'reason' => 'Brak SKU w pliku',
                 ];
+
                 continue;
             }
 
@@ -42,6 +43,7 @@ class StockCheckService
                     'sku' => $sku,
                     'reason' => $productResponse['message'] ?? 'Produkt nie znaleziony',
                 ];
+
                 continue;
             }
 
@@ -54,6 +56,7 @@ class StockCheckService
                     'sku' => $sku,
                     'reason' => 'Nieprawidłowa ilość na stanie',
                 ];
+
                 continue;
             }
 

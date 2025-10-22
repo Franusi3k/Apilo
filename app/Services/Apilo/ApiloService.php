@@ -15,13 +15,13 @@ class ApiloService
     {
         try {
             $response = \Illuminate\Support\Facades\Http::withHeaders($this->client->headers())
-                ->get(config('apilo.base_url') . 'rest/api/warehouse/product', ['sku' => $sku]);
+                ->get(config('apilo.base_url').'rest/api/warehouse/product', ['sku' => $sku]);
 
             if ($response->status() !== 200) {
                 return [
                     'status' => 'error',
-                    'message' => "Produkt $sku nie znaleziony: " . $response->body(),
-                    'data' => null
+                    'message' => "Produkt $sku nie znaleziony: ".$response->body(),
+                    'data' => null,
                 ];
             }
 
@@ -31,8 +31,8 @@ class ApiloService
             if (empty($products)) {
                 return [
                     'status' => 'error',
-                    'message' => 'Brak produktu dla SKU ' . $sku,
-                    'data' => null
+                    'message' => 'Brak produktu dla SKU '.$sku,
+                    'data' => null,
                 ];
             }
 
@@ -40,7 +40,7 @@ class ApiloService
         } catch (\Exception $e) {
             return [
                 'status' => 'error',
-                'message' => "Exception while fetching {$sku}: " . $e->getMessage(),
+                'message' => "Exception while fetching {$sku}: ".$e->getMessage(),
                 'data' => null,
             ];
         }
