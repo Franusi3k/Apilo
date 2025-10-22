@@ -1,5 +1,8 @@
 <template>
-  <form class="bg-white p-4 shadow-sm rounded-3 mb-5" @submit.prevent="submitForm()" >
+  <form class="bg-white p-4 shadow-sm rounded-3 mb-5" @submit.prevent="submitForm()">
+    <Loading v-model:active="loading" :is-full-page="true" background-color="rgba(0,0,0,0.4)" color="#ffffff"
+      loader="spinner" :can-cancel="false" :z-index="9999" :lock-scroll="true" />
+
     <FileUpload @file-selected="file = $event" @preview="emit('preview', file)" />
 
     <GeneralData v-model="generalData" />
@@ -25,6 +28,8 @@ import FileUpload from './FileUpload.vue'
 import GeneralData from './GeneralData.vue'
 import InvoiceData from './InvoiceData.vue'
 import ShippingData from './ShippingData.vue'
+import Loading from 'vue3-loading-overlay'
+import 'vue3-loading-overlay/dist/vue3-loading-overlay.css'
 
 const emit = defineEmits(['preview', 'success', 'error', 'missing-products', 'lowStockList'])
 
@@ -57,7 +62,11 @@ const shippingData = ref({
 })
 const notes = ref('')
 
+const loading = ref(false)
+
 const submitForm = async (ignoreMissingSku = false, confirmed_only = false, ignore_low_stock = false) => {
+  if (loading.value) return
+  loading.value = true
   try {
     emit('error', '')
     const formData = new FormData()
@@ -73,9 +82,6 @@ const submitForm = async (ignoreMissingSku = false, confirmed_only = false, igno
     const { data } = await axios.post(route('api.order.send'), formData, {
       headers: { 'Content-Type': 'multipart/form-data' },
     })
-
-    console.log(data);
-
     if (data.status === 'success') {
       emit('success', data.message)
     } else {
@@ -84,19 +90,19 @@ const submitForm = async (ignoreMissingSku = false, confirmed_only = false, igno
 
   } catch (e) {
     const res = e.response?.data
-    emit('error', res.message || 'Wystąpił nieoczekiwany błąd.')
 
     if (res?.data?.notFound) {
       emit('missing-products', {
         missingProducts: res.data.notFound,
         message: res.message
       })
+    } else if (res?.data?.missingProducts) {
+      emit('lowStockList', res.data.missingProducts);
+    } else {
+      emit('error', res.message || 'Wystąpił nieoczekiwany błąd.')
     }
-
-    if (res?.data?.confirmedProducts) {
-      emit('lowStockList', res.data.confirmedProducts);
-    }
-    console.error(e);
+  } finally {
+    loading.value = false
   }
 }
 

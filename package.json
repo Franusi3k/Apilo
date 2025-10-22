@@ -23,6 +23,7 @@
         "composer": "^4.1.0",
         "install": "^0.13.0",
         "vue": "^3.5.22",
+        "vue3-loading-overlay": "^0.0.0",
         "ziggy-js": "^2.6.0"
     }
 }
