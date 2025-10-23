@@ -13,7 +13,9 @@
 </template>
 
 <script setup>
-import { FilePreviewModal, LowStockModal, MissingProductsModal } from '@/components/modals'
+import FilePreviewModal from './Modals/FilePreviewModal.vue'
+import LowStockModal from './Modals/LowStockModal.vue'
+import MissingProductsModal from './Modals/MissingProductsModal.vue'
 
 defineProps({
   previewData: Array,
