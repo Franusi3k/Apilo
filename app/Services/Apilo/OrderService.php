@@ -48,7 +48,7 @@ class OrderService
                 $products->toArray(),
                 $request->boolean('ignore_missing_sku') ?? false,
                 $request->boolean('confirmed_only') ?? false,
-                $request->boolean('ignore_low_stock' ?? false)
+                $request->boolean('ignore_low_stock') ?? false
             );
             if ($stockResult['status'] !== 'success') {
                 return $stockResult;
@@ -58,7 +58,7 @@ class OrderService
 
             $discount = (float) ($generalData['discount'] ?? 0.00) / 100.0;
             $vat = (float) ($generalData['vat'] ?? 0.00) / 100.0;
-            $deliveryCost = (float) ($generalData['deliveryCost'] ?? 0.00);
+            $deliveryCost = (float) ($generalData['deliveryCost']) ?? 0.00;
 
             [$items, $totalNet, $totalGross, $errors] = $this->prepareItems($products, $discount, $vat);
 
@@ -94,6 +94,7 @@ class OrderService
             }
 
             $totalGross += $deliveryCost;
+
             $orderedAt = now()->format('Y-m-d\TH:i:sO');
             $notes = $notes ?: 'Brak notatki';
 
@@ -115,6 +116,14 @@ class OrderService
 
             $response = Http::withHeaders($this->apiloClient->headers())
                 ->post(config('apilo.base_url').'rest/api/orders/', $payload);
+
+            foreach ($items as $item) {
+                $sku = $item['sku'];
+                $qty = (int) $item['quantity'];
+                if ($sku && $qty > 0) {
+                    $this->apiloService->updateStockQuantity($item['sku'], $item['quantity']);
+                }
+            }
 
             if ($response->successful()) {
                 return [
@@ -159,7 +168,7 @@ class OrderService
                 $netPrice = parsePrice($netPriceStr);
 
                 $sku = trim($product['sku']) ?? '';
-                $name = trim($product['name'] ?? '');
+                $name = trim($product['name']) ?? '';
             } catch (\Throwable $e) {
                 $errors[] = "Błąd przetwarzania produktu: {$e->getMessage()}";
             }
