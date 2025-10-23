@@ -61,21 +61,27 @@ class PreviewService
         return key($counts);
     }
 
-    private function safeConvert(?string $value): string
-    {
-        if ($value === null) {
-            return '';
-        }
-
-        // spróbuj automatycznie
-        $encoded = @mb_convert_encoding($value, 'UTF-8', 'auto');
-
-        if ($encoded === false) {
-            // fallback dla plików z Windowsa
-            $encoded = @mb_convert_encoding($value, 'UTF-8', 'Windows-1250');
-        }
-
-        // ostateczny fallback – zwróć oryginał
-        return $encoded ?: (string) $value;
+private function safeConvert(?string $value): string
+{
+    if ($value === null) {
+        return '';
     }
+
+    // Wykryj kodowanie spośród najczęstszych w plikach CSV z Windowsa i Europy
+    $encoding = mb_detect_encoding($value, ['UTF-8', 'ISO-8859-1', 'ISO-8859-2', 'ASCII'], true);
+
+    if ($encoding === false) {
+        $encoding = 'ISO-8859-1'; // domyślne fallback
+    }
+
+    try {
+        $encoded = mb_convert_encoding($value, 'UTF-8', $encoding);
+    } catch (\ValueError $e) {
+        $encoded = $value;
+    }
+
+    return $encoded ?: (string) $value;
+}
+
+
 }
