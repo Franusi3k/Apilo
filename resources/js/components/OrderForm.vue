@@ -6,8 +6,6 @@
     <FileUpload @file-selected="file = $event" @preview="emit('preview', file)" />
 
     <GeneralData v-model="generalData" />
-    <InvoiceData v-model="invoiceData" />
-    <ShippingData v-model="shippingData" :invoiceData="invoiceData" />
 
     <div class="mb-3">
       <label>Uwagi sprzedawcy:</label>
@@ -23,16 +21,12 @@
 
 <script setup>
 import { ref } from 'vue'
-import axios from 'axios'
 import FileUpload from './FileUpload.vue'
 import GeneralData from './GeneralData.vue'
-import InvoiceData from './InvoiceData.vue'
-import ShippingData from './ShippingData.vue'
 import Loading from 'vue3-loading-overlay'
 import 'vue3-loading-overlay/dist/vue3-loading-overlay.css'
 
 const emit = defineEmits(['preview', 'success', 'error', 'missing-products', 'lowStockList'])
-
 
 const file = ref(null)
 const generalData = ref({
@@ -42,23 +36,7 @@ const generalData = ref({
   discount: 0,
   deliveryCost: '0.00',
   deliveryMethod: 'Eurohermes',
-})
-const invoiceData = ref({
-  company: '',
-  name: '',
-  street: '',
-  postcode: '',
-  city: '',
-  country: 'PL',
   taxNumber: ''
-})
-const shippingData = ref({
-  company: '',
-  name: '',
-  street: '',
-  postcode: '',
-  city: '',
-  country: 'PL'
 })
 const notes = ref('')
 
@@ -72,8 +50,6 @@ const submitForm = async (ignoreMissingSku = false, confirmed_only = false, igno
     const formData = new FormData()
     if (file.value) formData.append('file', file.value)
     formData.append('generalData', JSON.stringify(generalData.value))
-    formData.append('invoiceData', JSON.stringify(invoiceData.value))
-    formData.append('shippingData', JSON.stringify(shippingData.value))
     formData.append('notes', notes.value)
     formData.append('ignore_missing_sku', ignoreMissingSku)
     formData.append('confirmed_only', confirmed_only)
@@ -99,7 +75,7 @@ const submitForm = async (ignoreMissingSku = false, confirmed_only = false, igno
     } else if (res?.data?.missingProducts) {
       emit('lowStockList', res.data.missingProducts);
     } else {
-      emit('error', res.message || 'Wystąpił nieoczekiwany błąd.')
+      emit('error', res?.message || 'Wystąpił nieoczekiwany błąd.')
     }
   } finally {
     loading.value = false
@@ -109,5 +85,4 @@ const submitForm = async (ignoreMissingSku = false, confirmed_only = false, igno
 defineExpose({
   submitForm
 })
-
 </script>

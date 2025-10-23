@@ -36,6 +36,10 @@
           <option value="RohligSuus">Rohlig Suus</option>
         </select>
       </div>
+            <div class="col-md-3 mb-3">
+        <label>NIP:</label>
+        <input type="text" class="form-control" v-model="GeneralData.taxNumber" required />
+      </div>
     </div>
   </div>
 </template>
