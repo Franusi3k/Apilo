@@ -18,8 +18,6 @@ class OrderController extends Controller
     {
         $response = $this->orderService->sendOrder(
             $request->generalData,
-            $request->invoiceData,
-            $request->shippingData,
             $request->file('file'),
             $request->notes,
             $request

@@ -23,8 +23,6 @@ class SendOrderRequest extends FormRequest
     {
         return [
             'generalData' => 'required|string',
-            'invoiceData' => 'required|string',
-            'shippingData' => 'required|string',
 
             'notes' => 'nullable|string',
 
@@ -36,8 +34,6 @@ class SendOrderRequest extends FormRequest
     {
         return [
             'generalData.required' => 'Brak danych ogólnych zamówienia.',
-            'invoiceData.required' => 'Brak danych fakturowych.',
-            'shippingData.required' => 'Brak danych dostawy.',
             'file.required' => 'Brak załączonego pliku.',
             'file.mimes' => 'Nieprawidłowy format pliku. Dozwolone: CSV, TXT, XLSX.',
             'file.max' => 'Plik jest zbyt duży (max 10MB).',

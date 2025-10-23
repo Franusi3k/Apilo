@@ -2,7 +2,9 @@
 
 namespace App\Services;
 
+use Illuminate\Support\Collection;
 use League\Csv\Reader;
+use League\ISO3166\ISO3166;
 
 class PreviewService
 {
@@ -30,7 +32,7 @@ class PreviewService
                     'sku' => safeConvert($cols[6] ?? ''),
                     'netto' => safeConvert($cols[8] ?? ''),
                     'currency' => safeConvert($cols[13] ?? ''),
-                    'ean' => safeConvert($cols[14] ?? '', 'UTF-8'),
+                    'ean' => safeConvert($cols[14] ?? ''),
 
                     // client data
                     'client_firstname' => safeConvert($cols[15] ?? ''),
@@ -59,5 +61,26 @@ class PreviewService
         arsort($counts);
 
         return key($counts);
+    }
+
+    public function extractClientData(Collection $records): array
+    {
+        if ($records->isEmpty()) {
+            return [];
+        }
+
+        $first = $records->first();
+        $iso3166 = new ISO3166;
+
+        return [
+            'name' => trim(($first['client_firstname'] ?? '').' '.($first['client_lastname'] ?? '')),
+            'company' => $first['client_company'] ?? '',
+            'street' => $first['client_street'] ?? '',
+            'streetNumber' => $first['client_housenr'] ?? '',
+            'postcode' => $first['client_zip'] ?? '',
+            'city' => $first['client_city'] ?? '',
+            'country' => $iso3166->name($first['client_country'])['alpha2'] ?? 'PL',
+            'phone' => $first['client_phone'] ?? '',
+        ];
     }
 }
