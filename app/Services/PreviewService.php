@@ -23,11 +23,25 @@ class PreviewService
                 $cols = array_values($row);
 
                 return [
-                    'name' => isset($cols[1]) ? mb_convert_encoding($cols[1], 'UTF-8', 'auto') : '',
-                    'quantity' => isset($cols[4]) ? mb_convert_encoding($cols[4], 'UTF-8', 'auto') : '',
-                    'price' => isset($cols[5]) ? mb_convert_encoding($cols[5], 'UTF-8', 'auto') : '',
-                    'sku' => isset($cols[6]) ? mb_convert_encoding($cols[6], 'UTF-8', 'auto') : '',
-                    'netto' => isset($cols[8]) ? mb_convert_encoding($cols[8], 'UTF-8', 'auto') : '',
+                    // order data
+                    'name' => mb_convert_encoding($cols[1] ?? '', 'UTF-8', 'auto'),
+                    'quantity' => mb_convert_encoding($cols[4] ?? '', 'UTF-8', 'auto'),
+                    'price' => mb_convert_encoding($cols[5] ?? '', 'UTF-8', 'auto'),
+                    'sku' => mb_convert_encoding($cols[6] ?? '', 'UTF-8', 'auto'),
+                    'netto' => mb_convert_encoding($cols[8] ?? '', 'UTF-8', 'auto'),
+                    'currency' => mb_convert_encoding($cols[13] ?? '', 'UTF-8', 'auto'),
+                    'ean' => mb_convert_encoding($cols[14] ?? '', 'UTF-8', 'auto'),
+
+                    // client data
+                    'client_firstname' => mb_convert_encoding($cols[15] ?? '', 'UTF-8', 'auto'),
+                    'client_lastname' => mb_convert_encoding($cols[16] ?? '', 'UTF-8', 'auto'),
+                    'client_company' => mb_convert_encoding($cols[17] ?? '', 'UTF-8', 'auto'),
+                    'client_street' => mb_convert_encoding($cols[18] ?? '', 'UTF-8', 'auto'),
+                    'client_housenr' => mb_convert_encoding($cols[19] ?? '', 'UTF-8', 'auto'),
+                    'client_zip' => mb_convert_encoding($cols[21] ?? '', 'UTF-8', 'auto'),
+                    'client_city' => mb_convert_encoding($cols[22] ?? '', 'UTF-8', 'auto'),
+                    'client_country' => mb_convert_encoding($cols[23] ?? '', 'UTF-8', 'auto'),
+                    'client_phone' => mb_convert_encoding($cols[24] ?? '', 'UTF-8', 'auto'),
                 ];
             })
             ->values();
