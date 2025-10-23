@@ -24,24 +24,24 @@ class PreviewService
 
                 return [
                     // order data
-                    'name' => $this->safeConvert($cols[1] ?? '', 'UTF-8', 'auto'),
-                    'quantity' => $this->safeConvert($cols[4] ?? '', 'UTF-8', 'auto'),
-                    'price' => $this->safeConvert($cols[5] ?? '', 'UTF-8', 'auto'),
-                    'sku' => $this->safeConvert($cols[6] ?? '', 'UTF-8', 'auto'),
-                    'netto' => $this->safeConvert($cols[8] ?? '', 'UTF-8', 'auto'),
-                    'currency' => $this->safeConvert($cols[13] ?? '', 'UTF-8', 'auto'),
-                    'ean' => $this->safeConvert($cols[14] ?? '', 'UTF-8', 'auto'),
+                    'name' => safeConvert($cols[1] ?? ''),
+                    'quantity' => safeConvert($cols[4] ?? ''),
+                    'price' => safeConvert($cols[5] ?? ''),
+                    'sku' => safeConvert($cols[6] ?? ''),
+                    'netto' => safeConvert($cols[8] ?? ''),
+                    'currency' => safeConvert($cols[13] ?? ''),
+                    'ean' => safeConvert($cols[14] ?? '', 'UTF-8'),
 
                     // client data
-                    'client_firstname' => $this->safeConvert($cols[15] ?? '', 'UTF-8', 'auto'),
-                    'client_lastname' => $this->safeConvert($cols[16] ?? '', 'UTF-8', 'auto'),
-                    'client_company' => $this->safeConvert($cols[17] ?? '', 'UTF-8', 'auto'),
-                    'client_street' => $this->safeConvert($cols[18] ?? '', 'UTF-8', 'auto'),
-                    'client_housenr' => $this->safeConvert($cols[19] ?? '', 'UTF-8', 'auto'),
-                    'client_zip' => $this->safeConvert($cols[21] ?? '', 'UTF-8', 'auto'),
-                    'client_city' => $this->safeConvert($cols[22] ?? '', 'UTF-8', 'auto'),
-                    'client_country' => $this->safeConvert($cols[23] ?? '', 'UTF-8', 'auto'),
-                    'client_phone' => $this->safeConvert($cols[24] ?? '', 'UTF-8', 'auto'),
+                    'client_firstname' => safeConvert($cols[15] ?? ''),
+                    'client_lastname' => safeConvert($cols[16] ?? ''),
+                    'client_company' => safeConvert($cols[17] ?? ''),
+                    'client_street' => safeConvert($cols[18] ?? ''),
+                    'client_housenr' => safeConvert($cols[19] ?? ''),
+                    'client_zip' => safeConvert($cols[21] ?? ''),
+                    'client_city' => safeConvert($cols[22] ?? ''),
+                    'client_country' => safeConvert($cols[23] ?? ''),
+                    'client_phone' => safeConvert($cols[24] ?? ''),
                 ];
             })
             ->values();
@@ -60,28 +60,4 @@ class PreviewService
 
         return key($counts);
     }
-
-private function safeConvert(?string $value): string
-{
-    if ($value === null) {
-        return '';
-    }
-
-    // Wykryj kodowanie spośród najczęstszych w plikach CSV z Windowsa i Europy
-    $encoding = mb_detect_encoding($value, ['UTF-8', 'ISO-8859-1', 'ISO-8859-2', 'ASCII'], true);
-
-    if ($encoding === false) {
-        $encoding = 'ISO-8859-1'; // domyślne fallback
-    }
-
-    try {
-        $encoded = mb_convert_encoding($value, 'UTF-8', $encoding);
-    } catch (\ValueError $e) {
-        $encoded = $value;
-    }
-
-    return $encoded ?: (string) $value;
-}
-
-
 }

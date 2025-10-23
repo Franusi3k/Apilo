@@ -26,5 +26,8 @@ class AppServiceProvider extends ServiceProvider
         if (file_exists($file = app_path('Helpers/PriceFormatHelper.php'))) {
             require $file;
         }
+        if (file_exists($file = app_path('Helpers/SaveConvertHelper.php'))) {
+            require $file;
+        }
     }
 }
