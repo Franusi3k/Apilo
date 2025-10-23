@@ -24,24 +24,24 @@ class PreviewService
 
                 return [
                     // order data
-                    'name' => mb_convert_encoding($cols[1] ?? '', 'UTF-8', 'auto'),
-                    'quantity' => mb_convert_encoding($cols[4] ?? '', 'UTF-8', 'auto'),
-                    'price' => mb_convert_encoding($cols[5] ?? '', 'UTF-8', 'auto'),
-                    'sku' => mb_convert_encoding($cols[6] ?? '', 'UTF-8', 'auto'),
-                    'netto' => mb_convert_encoding($cols[8] ?? '', 'UTF-8', 'auto'),
-                    'currency' => mb_convert_encoding($cols[13] ?? '', 'UTF-8', 'auto'),
-                    'ean' => mb_convert_encoding($cols[14] ?? '', 'UTF-8', 'auto'),
+                    'name' => $this->safeConvert($cols[1] ?? '', 'UTF-8', 'auto'),
+                    'quantity' => $this->safeConvert($cols[4] ?? '', 'UTF-8', 'auto'),
+                    'price' => $this->safeConvert($cols[5] ?? '', 'UTF-8', 'auto'),
+                    'sku' => $this->safeConvert($cols[6] ?? '', 'UTF-8', 'auto'),
+                    'netto' => $this->safeConvert($cols[8] ?? '', 'UTF-8', 'auto'),
+                    'currency' => $this->safeConvert($cols[13] ?? '', 'UTF-8', 'auto'),
+                    'ean' => $this->safeConvert($cols[14] ?? '', 'UTF-8', 'auto'),
 
                     // client data
-                    'client_firstname' => mb_convert_encoding($cols[15] ?? '', 'UTF-8', 'auto'),
-                    'client_lastname' => mb_convert_encoding($cols[16] ?? '', 'UTF-8', 'auto'),
-                    'client_company' => mb_convert_encoding($cols[17] ?? '', 'UTF-8', 'auto'),
-                    'client_street' => mb_convert_encoding($cols[18] ?? '', 'UTF-8', 'auto'),
-                    'client_housenr' => mb_convert_encoding($cols[19] ?? '', 'UTF-8', 'auto'),
-                    'client_zip' => mb_convert_encoding($cols[21] ?? '', 'UTF-8', 'auto'),
-                    'client_city' => mb_convert_encoding($cols[22] ?? '', 'UTF-8', 'auto'),
-                    'client_country' => mb_convert_encoding($cols[23] ?? '', 'UTF-8', 'auto'),
-                    'client_phone' => mb_convert_encoding($cols[24] ?? '', 'UTF-8', 'auto'),
+                    'client_firstname' => $this->safeConvert($cols[15] ?? '', 'UTF-8', 'auto'),
+                    'client_lastname' => $this->safeConvert($cols[16] ?? '', 'UTF-8', 'auto'),
+                    'client_company' => $this->safeConvert($cols[17] ?? '', 'UTF-8', 'auto'),
+                    'client_street' => $this->safeConvert($cols[18] ?? '', 'UTF-8', 'auto'),
+                    'client_housenr' => $this->safeConvert($cols[19] ?? '', 'UTF-8', 'auto'),
+                    'client_zip' => $this->safeConvert($cols[21] ?? '', 'UTF-8', 'auto'),
+                    'client_city' => $this->safeConvert($cols[22] ?? '', 'UTF-8', 'auto'),
+                    'client_country' => $this->safeConvert($cols[23] ?? '', 'UTF-8', 'auto'),
+                    'client_phone' => $this->safeConvert($cols[24] ?? '', 'UTF-8', 'auto'),
                 ];
             })
             ->values();
@@ -59,5 +59,23 @@ class PreviewService
         arsort($counts);
 
         return key($counts);
+    }
+
+    private function safeConvert(?string $value): string
+    {
+        if ($value === null) {
+            return '';
+        }
+
+        // spróbuj automatycznie
+        $encoded = @mb_convert_encoding($value, 'UTF-8', 'auto');
+
+        if ($encoded === false) {
+            // fallback dla plików z Windowsa
+            $encoded = @mb_convert_encoding($value, 'UTF-8', 'Windows-1250');
+        }
+
+        // ostateczny fallback – zwróć oryginał
+        return $encoded ?: (string) $value;
     }
 }
