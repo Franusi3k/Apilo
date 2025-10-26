@@ -24,6 +24,7 @@ import { ref } from 'vue'
 import FileUpload from './FileUpload.vue'
 import GeneralData from './GeneralData.vue'
 import Loading from 'vue3-loading-overlay'
+import axios from 'axios'
 import 'vue3-loading-overlay/dist/vue3-loading-overlay.css'
 
 const emit = defineEmits(['preview', 'success', 'error', 'missing-products', 'lowStockList'])
@@ -34,7 +35,6 @@ const generalData = ref({
   phone: '',
   vat: 0,
   discount: 0,
-  deliveryCost: '0.00',
   deliveryMethod: 'Eurohermes',
   taxNumber: ''
 })

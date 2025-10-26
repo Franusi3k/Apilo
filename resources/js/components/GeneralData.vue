@@ -26,10 +26,6 @@
         <input type="number" class="form-control" v-model="GeneralData.discount" min="0" max="100" />
       </div>
       <div class="col-md-3 mb-3">
-        <label>Koszt dostawy [PLN]:</label>
-        <input type="text" class="form-control" v-model="GeneralData.deliveryCost" />
-      </div>
-      <div class="col-md-3 mb-3">
         <label>Sposób dostawy:</label>
         <select class="form-select" v-model="GeneralData.deliveryMethod">
           <option value="Eurohermes">Eurohermes</option>
