@@ -24,7 +24,6 @@ import { ref } from 'vue'
 import FileUpload from './FileUpload.vue'
 import GeneralData from './GeneralData.vue'
 import Loading from 'vue3-loading-overlay'
-import axios from 'axios'
 import 'vue3-loading-overlay/dist/vue3-loading-overlay.css'
 import axios from 'axios'
 
