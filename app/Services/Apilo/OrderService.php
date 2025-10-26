@@ -31,18 +31,16 @@ class OrderService
 
     public function sendOrder(
         $generalDataJson,
-        $invoiceDataJson,
-        $shippingDataJson,
         $file,
         $notes = null,
         $request = null
     ): array {
+
         try {
             $generalData = json_decode($generalDataJson, true);
-            $invoiceData = json_decode($invoiceDataJson, true);
-            $shippingData = json_decode($shippingDataJson, true);
 
             $products = $this->previewService->parseCsv($file);
+            $clientData = $this->previewService->extractClientData($products);
 
             $stockResult = $this->handleStockCheck(
                 $products->toArray(),
@@ -71,12 +69,6 @@ class OrderService
                 ];
             }
 
-            $invoiceStreetFull = $invoiceData['street'] ?? '';
-            [$invoiceStreetName, $invoiceStreetNumber] = splitStreetAndNumber($invoiceStreetFull);
-
-            $shippingStreetFull = $shippingData['street'] ?? '';
-            [$shippingStreetName, $shippingStreetNumber] = splitStreetAndNumber($shippingStreetFull);
-
             $CARRIER_MAP = [
                 'Eurohermes' => 9,
                 'RohligSuus' => 69,
@@ -100,15 +92,10 @@ class OrderService
 
             $payload = $this->buildPayload(
                 $generalData,
-                $invoiceData,
-                $shippingData,
+                $clientData,
                 $items,
                 $totalNet,
                 $totalGross,
-                $invoiceStreetName,
-                $invoiceStreetNumber,
-                $shippingStreetName,
-                $shippingStreetNumber,
                 $carrierAccountId,
                 $notes,
                 $orderedAt
@@ -210,15 +197,10 @@ class OrderService
 
     private function buildPayload(
         array $generalData,
-        array $invoiceData,
-        array $shippingData,
+        array $clientData,
         array $items,
         float $totalNet,
         float $totalGross,
-        string $invoiceStreetName,
-        string $invoiceStreetNumber,
-        string $shippingStreetName,
-        string $shippingStreetNumber,
         int $carrierAccountId,
         string $notes,
         string $orderedAt
@@ -237,38 +219,38 @@ class OrderService
             'preferences' => [],
             'orderItems' => $items,
             'addressCustomer' => [
-                'name' => $invoiceData['name'] ?? '',
-                'phone' => $generalData['phone'] ?? '',
+                'name' => $generalData['client'] ?? '',
+                'phone' => $clientData['phone'] ?? '',
                 'email' => 'shipping@zentrada.com',
-                'streetName' => $invoiceStreetName,
-                'streetNumber' => $invoiceStreetNumber,
-                'city' => $invoiceData['city'] ?? '',
-                'zipCode' => $invoiceData['postcode'] ?? '',
-                'country' => $invoiceData['country'] ?? '',
-                'companyTaxNumber' => $invoiceData['taxNumber'] ?? '',
-                'companyName' => $invoiceData['company'] ?? '',
+                'streetName' => $clientData['street'],
+                'streetNumber' => $clientData['streetNumber'],
+                'city' => $clientData['city'] ?? '',
+                'zipCode' => $clientData['postcode'] ?? '',
+                'country' => $clientData['country'] ?? '',
+                'companyTaxNumber' => $generalData['taxNumber'] ?? '', // do zmiany
+                'companyName' => $clientData['company'] ?? '',
             ],
             'addressDelivery' => [
-                'name' => $shippingData['name'] ?? '',
-                'phone' => $generalData['phone'] ?? '',
+                'name' => $clientData['name'] ?? '',
+                'phone' => $clientData['phone'] ?? '',
                 'email' => 'shipping@zentrada.com',
-                'streetName' => $shippingStreetName,
-                'streetNumber' => $shippingStreetNumber,
-                'city' => $shippingData['city'] ?? '',
-                'zipCode' => $shippingData['postcode'] ?? '',
-                'country' => $shippingData['country'] ?? '',
-                'companyName' => $shippingData['company'] ?? '',
+                'streetName' => $clientData['street'],
+                'streetNumber' => $clientData['streetNumber'],
+                'city' => $clientData['city'] ?? '',
+                'zipCode' => $clientData['postcode'] ?? '',
+                'country' => $clientData['country'] ?? '',
+                'companyName' => $clientData['company'] ?? '',
             ],
             'addressInvoice' => [
-                'name' => $invoiceData['name'] ?? '',
-                'phone' => $generalData['phone'] ?? '',
+                'name' => $clientData['name'] ?? '',
+                'phone' => $clientData['phone'] ?? '',
                 'email' => 'shipping@zentrada.com',
-                'streetName' => $invoiceStreetName,
-                'streetNumber' => $invoiceStreetNumber,
-                'city' => $invoiceData['city'] ?? '',
-                'zipCode' => $invoiceData['postcode'] ?? '',
-                'country' => $invoiceData['country'] ?? '',
-                'companyName' => $invoiceData['company'] ?? '',
+                'streetName' => $clientData['street'],
+                'streetNumber' => $clientData['streetNumber'],
+                'city' => $clientData['city'] ?? '',
+                'zipCode' => $clientData['postcode'] ?? '',
+                'country' => $clientData['country'] ?? '',
+                'companyName' => $clientData['company'] ?? '',
             ],
             'carrierAccount' => $carrierAccountId,
             'orderNotes' => [

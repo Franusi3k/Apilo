@@ -84,7 +84,7 @@ class ApiloService
         $payload = [[
             'id' => (int) $productId,
             'sku' => $sku,
-            'quantity' => $currentQty,
+            'quantity' => $newQty,
             'tax' => $tax,
             'status' => (int) ($product['status'] ?? 1),
             'priceWithTax' => $product['priceWithTax'] ?? null,
