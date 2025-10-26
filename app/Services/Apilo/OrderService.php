@@ -56,7 +56,6 @@ class OrderService
 
             $discount = (float) ($generalData['discount'] ?? 0.00) / 100.0;
             $vat = (float) ($generalData['vat'] ?? 0.00) / 100.0;
-            $deliveryCost = (float) ($generalData['deliveryCost']) ?? 0.00;
 
             [$items, $totalNet, $totalGross, $errors] = $this->prepareItems($products, $discount, $vat);
 
@@ -84,8 +83,6 @@ class OrderService
                     'status_code' => 400,
                 ];
             }
-
-            $totalGross += $deliveryCost;
 
             $orderedAt = now()->format('Y-m-d\TH:i:sO');
             $notes = $notes ?: 'Brak notatki';
