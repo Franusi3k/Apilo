@@ -11,7 +11,8 @@ return [
     |
     */
 
-    'base_url' => 'https://sklepadgo.apilo.com/',
-    'platform_id' => 9,
-
+    'base_url' => env('APILO_BASE_URL', 'https://api.apilo.com'),
+    'client_id' => env('APILO_CLIENT_ID'),
+    'client_secret' => env('APILO_CLIENT_SECRET'),
+    'platform_id' => env('APILO_PLATFORM_ID'),
 ];
