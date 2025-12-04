@@ -8,7 +8,7 @@ use League\ISO3166\ISO3166;
 
 class PreviewService
 {
-    public function parseCsv($file)
+    public function parseCsv($file): Collection
     {
         $content = file_get_contents($file->getRealPath());
         $sample = substr($content, 0, 1024);
@@ -73,7 +73,7 @@ class PreviewService
         $iso3166 = new ISO3166;
 
         return [
-            'name' => trim(($first['client_firstname'] ?? '').' '.($first['client_lastname'] ?? '')),
+            'name' => trim(($first['client_firstname'] ?? '') . ' ' . ($first['client_lastname'] ?? '')),
             'company' => $first['client_company'] ?? '',
             'street' => $first['client_street'] ?? '',
             'streetNumber' => $first['client_housenr'] ?? '',

@@ -5,17 +5,13 @@ namespace App\Http\Controllers;
 use App\Services\PreviewService;
 use Illuminate\Http\Request;
 use League\Csv\Exception;
+use Symfony\Component\HttpFoundation\JsonResponse;
 
 class PreviewController extends Controller
 {
-    protected PreviewService $previewService;
+    public function __construct(private PreviewService $previewService) {}
 
-    public function __construct(PreviewService $previewService)
-    {
-        $this->previewService = $previewService;
-    }
-
-    public function preview(Request $request)
+    public function preview(Request $request): JsonResponse
     {
         $file = $request->file('excel_file');
 
@@ -29,7 +25,7 @@ class PreviewController extends Controller
             return response()->json($records);
         } catch (Exception $e) {
             return response()->json([
-                'error' => 'Błąd przetwarzania pliku: '.$e->getMessage(),
+                'error' => 'Błąd przetwarzania pliku: ' . $e->getMessage(),
             ], 500);
         }
     }

@@ -4,12 +4,7 @@ namespace App\Services\Apilo;
 
 class StockCheckService
 {
-    protected ApiloService $apiloService;
-
-    public function __construct(ApiloService $apiloService)
-    {
-        $this->apiloService = $apiloService;
-    }
+    public function __construct(private ApiloService $apiloService) {}
 
     /**
      * Sprawdza dostępność produktów po SKU i dzieli je na 3 grupy:

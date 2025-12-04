@@ -9,25 +9,13 @@ use Illuminate\Support\Facades\Http;
 
 class OrderService
 {
-    protected PreviewService $previewService;
-
-    protected ApiloService $apiloService;
-
-    protected ApiloClient $apiloClient;
-
-    protected StockCheckService $stockCheckService;
 
     public function __construct(
-        PreviewService $previewService,
-        ApiloService $apiloService,
-        ApiloClient $apiloClient,
-        StockCheckService $stockCheckService
-    ) {
-        $this->previewService = $previewService;
-        $this->apiloService = $apiloService;
-        $this->apiloClient = $apiloClient;
-        $this->stockCheckService = $stockCheckService;
-    }
+        protected PreviewService $previewService,
+        protected ApiloService $apiloService,
+        protected ApiloClient $apiloClient,
+        protected StockCheckService $stockCheckService
+    ) {}
 
     public function sendOrder(
         $generalDataJson,
@@ -99,7 +87,7 @@ class OrderService
             );
 
             $response = Http::withHeaders($this->apiloClient->headers())
-                ->post(config('apilo.base_url').'rest/api/orders/', $payload);
+                ->post(config('apilo.base_url') . 'rest/api/orders/', $payload);
 
             foreach ($items as $item) {
                 $sku = $item['sku'];
@@ -120,14 +108,14 @@ class OrderService
 
             return [
                 'status' => 'error',
-                'message' => 'Błąd podczas wysyłania zamówienia: '.$response->body(),
+                'message' => 'Błąd podczas wysyłania zamówienia: ' . $response->body(),
                 'data' => [],
                 'status_code' => $response->status(),
             ];
         } catch (Exception $ex) {
             return [
                 'status' => 'error',
-                'message' => 'Niespodziewany błąd: '.$ex->getMessage(),
+                'message' => 'Niespodziewany błąd: ' . $ex->getMessage(),
                 'data' => [],
                 'status_code' => 500,
             ];
@@ -204,7 +192,7 @@ class OrderService
     ): array {
         return [
             'platformId' => config('apilo.platform_id'),
-            'idExternal' => 'WWW/'.now()->format('YmdHis'),
+            'idExternal' => 'WWW/' . now()->format('YmdHis'),
             'isInvoice' => true,
             'customerLogin' => $generalData['client'] ?? 'unknown',
             'paymentStatus' => 2,

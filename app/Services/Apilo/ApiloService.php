@@ -6,23 +6,18 @@ use Illuminate\Support\Facades\Http;
 
 class ApiloService
 {
-    protected ApiloClient $client;
-
-    public function __construct(ApiloClient $client)
-    {
-        $this->client = $client;
-    }
+    public function __construct(private ApiloClient $client) {}
 
     public function fetchProductBySku(string $sku): array
     {
         try {
             $response = \Illuminate\Support\Facades\Http::withHeaders($this->client->headers())
-                ->get(config('apilo.base_url').'rest/api/warehouse/product', ['sku' => $sku]);
+                ->get(config('apilo.base_url') . 'rest/api/warehouse/product', ['sku' => $sku]);
 
             if ($response->status() !== 200) {
                 return [
                     'status' => 'error',
-                    'message' => "Produkt $sku nie znaleziony: ".$response->body(),
+                    'message' => "Produkt $sku nie znaleziony: " . $response->body(),
                     'data' => null,
                 ];
             }
@@ -33,7 +28,7 @@ class ApiloService
             if (empty($products)) {
                 return [
                     'status' => 'error',
-                    'message' => 'Brak produktu dla SKU '.$sku,
+                    'message' => 'Brak produktu dla SKU ' . $sku,
                     'data' => null,
                 ];
             }
@@ -42,7 +37,7 @@ class ApiloService
         } catch (\Exception $e) {
             return [
                 'status' => 'error',
-                'message' => "Exception while fetching {$sku}: ".$e->getMessage(),
+                'message' => "Exception while fetching {$sku}: " . $e->getMessage(),
                 'data' => null,
             ];
         }
@@ -91,7 +86,7 @@ class ApiloService
         ]];
 
         $response = Http::withHeaders($this->client->headers())
-            ->put(config('apilo.base_url').'/warehouse/product/', $payload);
+            ->put(config('apilo.base_url') . '/warehouse/product/', $payload);
 
         if (! $response->successful()) {
             return [null, "Błąd {$response->status()}: {$response->body()}"];

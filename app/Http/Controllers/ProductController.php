@@ -6,14 +6,9 @@ use App\Services\Apilo\ApiloService;
 
 class ProductController extends Controller
 {
-    protected ApiloService $apilo;
+    public function __construct(private ApiloService $apilo) {}
 
-    public function __construct(ApiloService $apilo)
-    {
-        $this->apilo = $apilo;
-    }
-
-    public function getProductBySku($sku)
+    public function getProductBySku(int $sku)
     {
         [$product, $error] = $this->apilo->fetchProductBySku($sku);
 
