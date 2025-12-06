@@ -50,15 +50,15 @@ class ApiloAuthService
         $response = Http::withBasicAuth($this->clientId, $this->clientSecret)
             ->acceptJson()
             ->asJson()
-            ->post($this->baseUrl.'/rest/auth/token/', $payload);
+            ->post($this->baseUrl . '/rest/auth/token/', $payload);
 
         if (! $response->successful()) {
-            throw new Exception('Nie udało się odświeżyć tokenu: '.$response->body());
+            throw new Exception('Nie udało się odświeżyć tokenu: ' . $response->body());
         }
 
         $data = $response->json();
 
-        $expiresAtStr = $data['refreshTokenExpireAt'] ?? null;
+        $expiresAtStr = $data['accessTokenExpireAt'] ?? null;
         if ($expiresAtStr) {
             $dt = Carbon::createFromFormat('Y-m-d\TH:i:sP', $expiresAtStr);
             $expiresIn = $dt->timestamp - time();
@@ -86,5 +86,41 @@ class ApiloAuthService
         }
 
         return $tokens['access_token'];
+    }
+
+    public function exchangeAuthorizationCode(string $code): array
+    {
+        $payload =  [
+            "grantType" => "authorization_code",
+            "token" => $code,
+        ];
+
+        $response = Http::withBasicAuth($this->clientId, $this->clientSecret)
+            ->acceptJson()
+            ->post($this->baseUrl . '/rest/auth/token/', $payload);
+
+        if (! $response->successful()) {
+            throw new Exception('Nie udało się utworzyć tokenów: ' . $response->json('message'));
+        }
+
+        $data = $response->json();
+
+        $expiresAtStr = $data['accessTokenExpireAt'] ?? null;
+        if ($expiresAtStr) {
+            $dt = Carbon::createFromFormat('Y-m-d\TH:i:sP', $expiresAtStr);
+            $expiresIn = $dt->timestamp - time();
+        } else {
+            $expiresIn = 21 * 24 * 3600;
+        }
+
+        $tokens = [
+            'access_token' => $data['accessToken'],
+            'refresh_token' => $data['refreshToken'],
+            'expires_at' => time() + $expiresIn - $this->expireMargin,
+        ];
+
+        $this->saveTokens($tokens);
+
+        return $tokens;
     }
 }
