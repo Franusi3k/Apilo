@@ -47,30 +47,9 @@ class ApiloAuthService
             'token' => trim($refreshToken),
         ];
 
-        $response = Http::withBasicAuth($this->clientId, $this->clientSecret)
-            ->acceptJson()
-            ->asJson()
-            ->post($this->baseUrl . '/rest/auth/token/', $payload);
+        $data = $this->getResponse($payload);
 
-        if (! $response->successful()) {
-            throw new Exception('Nie udało się odświeżyć tokenu: ' . $response->body());
-        }
-
-        $data = $response->json();
-
-        $expiresAtStr = $data['accessTokenExpireAt'] ?? null;
-        if ($expiresAtStr) {
-            $dt = Carbon::createFromFormat('Y-m-d\TH:i:sP', $expiresAtStr);
-            $expiresIn = $dt->timestamp - time();
-        } else {
-            $expiresIn = 21 * 24 * 3600;
-        }
-
-        $tokens = [
-            'access_token' => $data['accessToken'],
-            'refresh_token' => $data['refreshToken'] ?? $refreshToken,
-            'expires_at' => time() + $expiresIn - $this->expireMargin,
-        ];
+        $tokens = $this->makeTokenArray($data, $refreshToken);
 
         $this->saveTokens($tokens);
 
@@ -95,6 +74,39 @@ class ApiloAuthService
             "token" => $code,
         ];
 
+        $data = $this->getResponse($payload);
+
+        $tokens = $this->makeTokenArray($data);
+
+        $this->saveTokens($tokens);
+
+        return $tokens;
+    }
+
+    private function calculateExpiresAt(?string $expiresAtStr): int
+    {
+        if ($expiresAtStr) {
+            $dt = Carbon::createFromFormat('Y-m-d\TH:i:sP', $expiresAtStr);
+            $expiresIn = $dt->timestamp - time();
+        } else {
+            $expiresIn = 21 * 24 * 3600;
+        }
+
+        return time() + $expiresIn - $this->expireMargin;
+    }
+
+    private function makeTokenArray(array $data, ?string $fallbackRefreshToken = null): array
+    {
+        return [
+            'access_token'  => $data['accessToken'],
+            'refresh_token' => $data['refreshToken'] ?? $fallbackRefreshToken,
+            'expires_at'    => $this->calculateExpiresAt($data['accessTokenExpireAt'] ?? null),
+        ];
+    }
+
+
+    private function getResponse(array $payload): array
+    {
         $response = Http::withBasicAuth($this->clientId, $this->clientSecret)
             ->acceptJson()
             ->post($this->baseUrl . '/rest/auth/token/', $payload);
@@ -103,24 +115,6 @@ class ApiloAuthService
             throw new Exception('Nie udało się utworzyć tokenów: ' . $response->json('message'));
         }
 
-        $data = $response->json();
-
-        $expiresAtStr = $data['accessTokenExpireAt'] ?? null;
-        if ($expiresAtStr) {
-            $dt = Carbon::createFromFormat('Y-m-d\TH:i:sP', $expiresAtStr);
-            $expiresIn = $dt->timestamp - time();
-        } else {
-            $expiresIn = 21 * 24 * 3600;
-        }
-
-        $tokens = [
-            'access_token' => $data['accessToken'],
-            'refresh_token' => $data['refreshToken'],
-            'expires_at' => time() + $expiresIn - $this->expireMargin,
-        ];
-
-        $this->saveTokens($tokens);
-
-        return $tokens;
+        return $response->json();
     }
 }
