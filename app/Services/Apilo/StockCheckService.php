@@ -2,77 +2,84 @@
 
 namespace App\Services\Apilo;
 
+use App\DTO\StockCheckResult;
+use App\DTO\StockLineResult;
+use App\Enums\StockStatus;
+
+/**
+ * Sprawdza dostępność produktów po SKU i dzieli je na 3 grupy:
+ * - confirmed (dostępne)
+ * - pending (za mało na stanie)
+ * - notFound (brak lub błąd)
+ */
+
 class StockCheckService
 {
     public function __construct(private ApiloService $apiloService) {}
 
-    /**
-     * Sprawdza dostępność produktów po SKU i dzieli je na 3 grupy:
-     * - confirmed (dostępne)
-     * - pending (za mało na stanie)
-     * - notFound (brak lub błąd)
-     */
-    public function processProductsWithStockCheck(array $csvData): array
+    public function processProductsWithStockCheck(array $csvData): StockCheckResult
     {
-        $confirmedProducts = [];
-        $pendingConfirmation = [];
+        $confirmed = [];
+        $pending = [];
         $notFound = [];
 
         foreach ($csvData as $row) {
-            $sku = $row['sku'] ?? null;
-            $requestedQuantity = (int) ($row['quantity'] ?? 0);
 
-            if (empty($sku)) {
-                $notFound[] = [
-                    'sku' => null,
-                    'reason' => 'Brak SKU w pliku',
-                ];
+            $line = $this->processLine($row);
 
-                continue;
-            }
-
-            $productResponse = $this->apiloService->fetchProductBySku($sku);
-
-            if ($productResponse['status'] !== 'success' || empty($productResponse['data'])) {
-                $notFound[] = [
-                    'sku' => $sku,
-                    'reason' => $productResponse['message'] ?? 'Produkt nie znaleziony',
-                ];
-
-                continue;
-            }
-
-            $product = $productResponse['data'];
-
-            try {
-                $currentStock = (int) ($product['quantity'] ?? 0);
-            } catch (\Exception $e) {
-                $notFound[] = [
-                    'sku' => $sku,
-                    'reason' => 'Nieprawidłowa ilość na stanie',
-                ];
-
-                continue;
-            }
-
-            $combinedData = [
-                'product' => $product,
-                'requested_quantity' => $requestedQuantity,
-                'csv_data' => $row,
-            ];
-
-            if ($currentStock >= $requestedQuantity) {
-                $confirmedProducts[] = $combinedData;
-            } else {
-                $combinedData['missing_quantity'] = $requestedQuantity - $currentStock;
-                $pendingConfirmation[] = $combinedData;
-            }
+            match ($line->status) {
+                StockStatus::CONFIRMED => $confirmed[] = $line,
+                StockStatus::PENDING   => $pending[]   = $line,
+                StockStatus::NOT_FOUND => $notFound[]  = $line,
+            };
         }
 
-        return [
-            'confirmed' => $confirmedProducts,
-            'toConfirm' => $pendingConfirmation,
-            'notFound' => $notFound,
-        ];
+        return new StockCheckResult($confirmed, $pending, $notFound);
+    }
+
+    private function processLine(array $row): StockLineResult
+    {
+        $sku = $row['sku'] ?? null;
+        $requested = (int) ($row['quantity'] ?? 0);
+
+        if (!$sku) {
+            return new StockLineResult(
+                status: StockStatus::NOT_FOUND,
+                product: null,
+                csv: $row,
+                reason: 'Brak SKU w pliku'
+            );
+        }
+
+        $productResponse = $this->apiloService->fetchProductBySku($sku);
+
+        if (!$productResponse->success) {
+            return new StockLineResult(
+                status: StockStatus::NOT_FOUND,
+                product: null,
+                csv: $row,
+                reason: $productResponse->message
+            );
+        }
+
+        $product = $productResponse->data;
+        $stock = (int) ($product['quantity'] ?? 0);
+
+        if ($stock >= $requested) {
+            return new StockLineResult(
+                status: StockStatus::CONFIRMED,
+                product: $product,
+                csv: $row,
+                requestedQuantity: $requested
+            );
+        }
+
+        return new StockLineResult(
+            status: StockStatus::PENDING,
+            product: $product,
+            csv: $row,
+            requestedQuantity: $requested,
+            missingQuantity: $requested - $stock
+        );
     }
 }
