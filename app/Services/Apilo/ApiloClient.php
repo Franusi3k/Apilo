@@ -2,6 +2,7 @@
 
 namespace App\Services\Apilo;
 
+use Illuminate\Http\Client\Response as ClientResponse;
 use Illuminate\Support\Facades\Http;
 
 class ApiloClient
@@ -12,7 +13,7 @@ class ApiloClient
 
     public function __construct(ApiloAuthService $authService)
     {
-        $this->baseUrl = config('apilo.base_url');
+        $this->baseUrl = rtrim(config('apilo.base_url'), '/');
         $this->authService = $authService;
     }
 
@@ -21,26 +22,35 @@ class ApiloClient
         return $this->authService->getAccessToken();
     }
 
-    /**
-     * Returns headers for all Apilo API requests
-     */
     public function headers(): array
     {
         return [
-            'Authorization' => 'Bearer '.$this->getAccessToken(),
+            'Authorization' => 'Bearer ' . $this->getAccessToken(),
             'Accept' => 'application/json',
             'Content-Type' => 'application/json',
         ];
     }
 
-    public function testConnection(): array
+    public function get(string $uri, array $query = []): ClientResponse
     {
-        $response = Http::withHeaders($this->headers())
-            ->get(config('apilo.base_url').'/rest/api');
+        return Http::withHeaders($this->headers())
+            ->get($this->url($uri), $query);
+    }
 
-        return [
-            'status' => $response->status(),
-            'body' => $response->json() ?? $response->body(),
-        ];
+    public function post(string $uri, array $payload): ClientResponse
+    {
+        return Http::withHeaders($this->headers())
+            ->post($this->url($uri), $payload);
+    }
+
+    public function put(string $uri, array $payload): ClientResponse
+    {
+        return Http::withHeaders($this->headers())
+            ->put($this->url($uri), $payload);
+    }
+
+    private function url(string $uri): string
+    {
+        return $this->baseUrl . '/' . ltrim($uri, '/');
     }
 }
