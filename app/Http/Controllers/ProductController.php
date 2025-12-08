@@ -3,19 +3,20 @@
 namespace App\Http\Controllers;
 
 use App\Services\Apilo\ApiloService;
+use Symfony\Component\HttpFoundation\JsonResponse;
 
 class ProductController extends Controller
 {
     public function __construct(private ApiloService $apilo) {}
 
-    public function getProductBySku(int $sku)
+    public function getProductBySku(string $sku): JsonResponse
     {
-        [$product, $error] = $this->apilo->fetchProductBySku($sku);
+        $result = $this->apilo->fetchProductBySku($sku);
 
-        if ($error) {
-            return response()->json(['error' => $error], 404);
+        if (!$result->success) {
+            return response()->json(['message' => $result->message], 404);
         }
 
-        return response()->json(['product' => $product], 200);
+        return response()->json(['product' => $result->data]);
     }
 }

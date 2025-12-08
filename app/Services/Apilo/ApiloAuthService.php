@@ -9,15 +9,15 @@ use Illuminate\Support\Facades\Storage;
 
 class ApiloAuthService
 {
-    protected string $baseUrl;
+    private string $baseUrl;
 
-    protected string $clientId;
+    private string $clientId;
 
-    protected string $clientSecret;
+    private string $clientSecret;
 
-    protected string $tokenFile = 'apilo_tokens.json';
+    private string $tokenFile = 'apilo_tokens.json';
 
-    protected int $expireMargin = 60;
+    private int $expireMargin = 60;
 
     public function __construct()
     {
@@ -103,7 +103,6 @@ class ApiloAuthService
             'expires_at'    => $this->calculateExpiresAt($data['accessTokenExpireAt'] ?? null),
         ];
     }
-
 
     private function getResponse(array $payload): array
     {
