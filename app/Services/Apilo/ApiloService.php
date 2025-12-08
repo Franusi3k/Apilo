@@ -3,7 +3,6 @@
 namespace App\Services\Apilo;
 
 use App\DTO\ApiloResult;
-use Illuminate\Support\Facades\Http;
 
 class ApiloService
 {
@@ -11,8 +10,7 @@ class ApiloService
 
     public function fetchProductBySku(string $sku): ApiloResult
     {
-        $response = Http::withHeaders($this->client->headers())
-            ->get(config('apilo.base_url') . 'rest/api/warehouse/product', ['sku' => $sku]);
+        $response = $this->client->get('rest/api/warehouse/product', ['sku' => $sku]);
 
         if (!$response->successful()) {
             return ApiloResult::fail("Produkt $sku nie znaleziony");
@@ -23,59 +21,43 @@ class ApiloService
         return $product ? ApiloResult::ok($product, 'Pobrano produkt') : ApiloResult::fail("Brak produktu dla SKU $sku");
     }
 
-    public function updateStockQuantity(string $sku, int $delta): array
+    public function updateStockQuantity(string $sku, int $delta): ApiloResult
     {
         $productResponse = $this->fetchProductBySku($sku);
 
-        if ($productResponse['status'] !== 'success' || empty($productResponse['data'])) {
-            return [
-                'status' => 'error',
-                'message' => "Nie znaleziono produktu: {$sku}",
-                'data' => null,
-            ];
+        if (!$productResponse->success) {
+            return ApiloResult::fail($productResponse->message);
         }
 
-        $product = $productResponse['data'];
+        $product = $productResponse->data;
 
-        try {
-            $currentQty = (int) ($product['quantity'] ?? 0);
-            $newQty = $currentQty - $delta;
-        } catch (\Throwable $e) {
-            return [null, "Błąd podczas przeliczania ilości: {$e->getMessage()}"];
+        $newQty = $this->calculateNewQuantity($product, $delta);
+
+        $payload = $this->buildPayload($product, $sku, $newQty);
+
+        $response = $this->client->put('/warehouse/product/', $payload);
+
+        if (! $response->successful()) {
+            return ApiloResult::fail("Błąd " . $response->status() . ": " . $response->json('message'));
         }
 
-        $productId = $product['id'] ?? null;
-        if (! $productId) {
-            return [null, "Brak ID produktu dla SKU {$sku}"];
-        }
+        return ApiloResult::ok($response->json());
+    }
 
-        $taxStr = $product['tax'] ?? '0';
-        try {
-            $tax = (int) floatval($taxStr);
-        } catch (\Throwable $e) {
-            $tax = 0;
-        }
+    private function calculateNewQuantity(array $product, int $delta): int
+    {
+        return ((int) ($product['quantity'] ?? 0)) - $delta;
+    }
 
-        $payload = [[
-            'id' => (int) $productId,
+    private function buildPayload(array $product, string $sku, int $newQty): array
+    {
+        return [[
+            'id' => (int) $product['id'],
             'sku' => $sku,
             'quantity' => $newQty,
-            'tax' => $tax,
+            'tax' => (int) ($product['tax'] ?? 0),
             'status' => (int) ($product['status'] ?? 1),
             'priceWithTax' => $product['priceWithTax'] ?? null,
         ]];
-
-        $response = Http::withHeaders($this->client->headers())
-            ->put(config('apilo.base_url') . '/warehouse/product/', $payload);
-
-        if (! $response->successful()) {
-            return [null, "Błąd {$response->status()}: {$response->body()}"];
-        }
-
-        try {
-            return [$response->json(), null];
-        } catch (\Throwable $e) {
-            return [null, "Błąd dekodowania JSON: {$e->getMessage()}"];
-        }
     }
 }
