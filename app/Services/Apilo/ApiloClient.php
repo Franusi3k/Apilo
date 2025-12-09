@@ -2,7 +2,7 @@
 
 namespace App\Services\Apilo;
 
-use Illuminate\Http\Client\Response as ClientResponse;
+use Illuminate\Http\Client\Response;
 use Illuminate\Support\Facades\Http;
 
 class ApiloClient
@@ -31,19 +31,19 @@ class ApiloClient
         ];
     }
 
-    public function get(string $uri, array $query = []): ClientResponse
+    public function get(string $uri, array $query = []): Response
     {
         return Http::withHeaders($this->headers())
             ->get($this->url($uri), $query);
     }
 
-    public function post(string $uri, array $payload): ClientResponse
+    public function post(string $uri, array $payload): Response
     {
         return Http::withHeaders($this->headers())
             ->post($this->url($uri), $payload);
     }
 
-    public function put(string $uri, array $payload): ClientResponse
+    public function put(string $uri, array $payload): Response
     {
         return Http::withHeaders($this->headers())
             ->put($this->url($uri), $payload);
