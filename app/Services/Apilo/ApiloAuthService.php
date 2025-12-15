@@ -14,36 +14,6 @@ class ApiloAuthService
 
     public function __construct(private ApiloClient $apiloClient) {}
 
-    public function loadTokens(): array
-    {
-        if (! Storage::disk('local')->exists($this->tokenFile)) {
-            throw new Exception('Brak pliku tokens.json!');
-        }
-
-        return json_decode(Storage::disk('local')->get($this->tokenFile), true);
-    }
-
-    public function saveTokens(array $tokens): void
-    {
-        Storage::disk('local')->put($this->tokenFile, json_encode($tokens, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES));
-    }
-
-    public function refreshAccessToken(string $refreshToken): array
-    {
-        $payload = [
-            'grantType' => 'refresh_token',
-            'token' => trim($refreshToken),
-        ];
-
-        $data = $this->getResponse($payload);
-
-        $tokens = $this->makeTokenArray($data, $refreshToken);
-
-        $this->saveTokens($tokens);
-
-        return $tokens;
-    }
-
     public function getAccessToken(): string
     {
         $tokens = $this->loadTokens();
@@ -65,6 +35,36 @@ class ApiloAuthService
         $data = $this->getResponse($payload);
 
         $tokens = $this->makeTokenArray($data);
+
+        $this->saveTokens($tokens);
+
+        return $tokens;
+    }
+
+    private function loadTokens(): array
+    {
+        if (! Storage::disk('local')->exists($this->tokenFile)) {
+            throw new Exception('Brak pliku tokens.json!');
+        }
+
+        return json_decode(Storage::disk('local')->get($this->tokenFile), true);
+    }
+
+    private function saveTokens(array $tokens): void
+    {
+        Storage::disk('local')->put($this->tokenFile, json_encode($tokens, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES));
+    }
+
+    private function refreshAccessToken(string $refreshToken): array
+    {
+        $payload = [
+            'grantType' => 'refresh_token',
+            'token' => trim($refreshToken),
+        ];
+
+        $data = $this->getResponse($payload);
+
+        $tokens = $this->makeTokenArray($data, $refreshToken);
 
         $this->saveTokens($tokens);
 
