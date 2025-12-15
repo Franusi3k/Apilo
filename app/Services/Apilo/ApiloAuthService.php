@@ -4,27 +4,15 @@ namespace App\Services\Apilo;
 
 use Carbon\Carbon;
 use Exception;
-use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Storage;
 
 class ApiloAuthService
 {
-    private string $baseUrl;
-
-    private string $clientId;
-
-    private string $clientSecret;
-
     private string $tokenFile = 'apilo_tokens.json';
 
     private int $expireMargin = 60;
 
-    public function __construct()
-    {
-        $this->baseUrl = config('apilo.base_url');
-        $this->clientId = config('apilo.client_id');
-        $this->clientSecret = config('apilo.client_secret');
-    }
+    public function __construct(private ApiloClient $apiloClient) {}
 
     public function loadTokens(): array
     {
@@ -106,9 +94,7 @@ class ApiloAuthService
 
     private function getResponse(array $payload): array
     {
-        $response = Http::withBasicAuth($this->clientId, $this->clientSecret)
-            ->acceptJson()
-            ->post($this->baseUrl . '/rest/auth/token/', $payload);
+        $response = $this->apiloClient->post('/rest/auth/token/', $payload);
 
         if (! $response->successful()) {
             throw new Exception('Nie udało się utworzyć tokenów: ' . $response->json('message'));
