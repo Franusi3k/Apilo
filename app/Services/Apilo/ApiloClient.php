@@ -7,25 +7,17 @@ use Illuminate\Support\Facades\Http;
 
 class ApiloClient
 {
-    protected string $baseUrl;
+    private readonly string $baseUrl;
 
-    protected ApiloAuthService $authService;
-
-    public function __construct(ApiloAuthService $authService)
+    public function __construct(private ApiloAuthService $authService) 
     {
         $this->baseUrl = rtrim(config('apilo.base_url'), '/');
-        $this->authService = $authService;
-    }
-
-    protected function getAccessToken(): string
-    {
-        return $this->authService->getAccessToken();
     }
 
     public function headers(): array
     {
         return [
-            'Authorization' => 'Bearer ' . $this->getAccessToken(),
+            'Authorization' => 'Bearer ' . $this->authService->getAccessToken(),
             'Accept' => 'application/json',
             'Content-Type' => 'application/json',
         ];
