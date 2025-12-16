@@ -2,7 +2,7 @@
 
 namespace App\Services\Csv;
 
-use App\DTO\CsvOrderRow;
+use App\DTO\CsvOrderLine;
 
 class CsvOrderRowMapper
 {
@@ -26,7 +26,7 @@ class CsvOrderRowMapper
         'client_phone' => 24,
     ];
 
-    public function map(array $row): CsvOrderRow
+    public function map(array $row): CsvOrderLine
     {
         $cols = array_values($row);
         $mapped = [];
@@ -35,6 +35,6 @@ class CsvOrderRowMapper
             $mapped[$key] = safeConvert($cols[$index] ?? '');
         }
 
-        return CsvOrderRow::fromArray($mapped);
+        return CsvOrderLine::fromArray($mapped);
     }
 }

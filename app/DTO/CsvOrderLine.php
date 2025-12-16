@@ -2,7 +2,7 @@
 
 namespace App\DTO;
 
-class CsvOrderRow
+class CsvOrderLine
 {
     public function __construct(
         public readonly string $name,

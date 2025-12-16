@@ -2,7 +2,7 @@
 
 namespace App\DTO;
 
-class StockCheckResult
+class StockCheckSummary
 {
     public function __construct(
         public readonly array $confirmed,
