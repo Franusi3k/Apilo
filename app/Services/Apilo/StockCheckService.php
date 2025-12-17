@@ -2,8 +2,9 @@
 
 namespace App\Services\Apilo;
 
-use App\DTO\StockCheckResult;
-use App\DTO\StockLineResult;
+use App\DTO\CsvOrderLine;
+use App\DTO\StockCheckSummary;
+use App\DTO\StockDecision;
 use App\Enums\StockStatus;
 
 /**
@@ -17,7 +18,7 @@ class StockCheckService
 {
     public function __construct(private ApiloService $apiloService) {}
 
-    public function processProductsWithStockCheck(array $csvData): StockCheckResult
+    public function processProductsWithStockCheck(array $csvData): StockCheckSummary
     {
         $confirmed = [];
         $pending = [];
@@ -34,16 +35,16 @@ class StockCheckService
             };
         }
 
-        return new StockCheckResult($confirmed, $pending, $notFound);
+        return new StockCheckSummary($confirmed, $pending, $notFound);
     }
 
-    private function processLine(array $row): StockLineResult
+    private function processLine(CsvOrderLine $row): StockDecision
     {
-        $sku = $row['sku'] ?? null;
-        $requested = (int) ($row['quantity'] ?? 0);
+        $sku = $row->sku;
+        $requested = (int) $row->quantity;
 
         if (!$sku) {
-            return new StockLineResult(
+            return new StockDecision(
                 status: StockStatus::NOT_FOUND,
                 product: null,
                 csv: $row,
@@ -54,7 +55,7 @@ class StockCheckService
         $productResponse = $this->apiloService->fetchProductBySku($sku);
 
         if (!$productResponse->success) {
-            return new StockLineResult(
+            return new StockDecision(
                 status: StockStatus::NOT_FOUND,
                 product: null,
                 csv: $row,
@@ -66,7 +67,7 @@ class StockCheckService
         $stock = (int) ($product['quantity'] ?? 0);
 
         if ($stock >= $requested) {
-            return new StockLineResult(
+            return new StockDecision(
                 status: StockStatus::CONFIRMED,
                 product: $product,
                 csv: $row,
@@ -74,7 +75,7 @@ class StockCheckService
             );
         }
 
-        return new StockLineResult(
+        return new StockDecision(
             status: StockStatus::PENDING,
             product: $product,
             csv: $row,
