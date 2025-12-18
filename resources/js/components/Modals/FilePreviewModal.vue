@@ -57,15 +57,15 @@
                   </template>
 
                   <template v-else>
-                    <td>{{ row.client_firstname }}</td>
-                    <td>{{ row.client_lastname }}</td>
-                    <td>{{ row.client_company }}</td>
-                    <td>{{ row.client_street }}</td>
-                    <td>{{ row.client_housenr }}</td>
-                    <td>{{ row.client_zip }}</td>
-                    <td>{{ row.client_city }}</td>
-                    <td>{{ row.client_country }}</td>
-                    <td>{{ row.client_phone }}</td>
+                    <td>{{ row.client.firstname }}</td>
+                    <td>{{ row.client.lastname }}</td>
+                    <td>{{ row.client.company }}</td>
+                    <td>{{ row.client.street }}</td>
+                    <td>{{ row.client.housenr }}</td>
+                    <td>{{ row.client.zip }}</td>
+                    <td>{{ row.client.city }}</td>
+                    <td>{{ row.client.country }}</td>
+                    <td>{{ row.client.phone }}</td>
                   </template>
                 </tr>
               </tbody>
