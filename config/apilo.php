@@ -15,5 +15,4 @@ return [
     'client_id' => env('APILO_CLIENT_ID'),
     'client_secret' => env('APILO_CLIENT_SECRET'),
     'platform_id' => env('APILO_PLATFORM_ID'),
-    'authorization_code' => env('APILO_AUTHORIZATION_CODE') ?? null,
 ];
