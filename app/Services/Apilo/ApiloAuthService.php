@@ -5,14 +5,13 @@ namespace App\Services\Apilo;
 use Carbon\Carbon;
 use Exception;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\Http;
 
 class ApiloAuthService
 {
     private string $tokenFile = 'apilo_tokens.json';
 
     private int $expireMargin = 60;
-
-    public function __construct(private ApiloClient $apiloClient) {}
 
     public function getAccessToken(): string
     {
@@ -94,7 +93,10 @@ class ApiloAuthService
 
     private function getResponse(array $payload): array
     {
-        $response = $this->apiloClient->post('/rest/auth/token/', $payload);
+        $response = Http::post(
+            rtrim(config('apilo.base_url'), '/') . '/rest/auth/token/',
+            $payload
+        );
 
         if (! $response->successful()) {
             throw new Exception('Nie udało się utworzyć tokenów: ' . $response->json('message'));
