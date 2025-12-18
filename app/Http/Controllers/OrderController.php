@@ -19,6 +19,6 @@ class OrderController extends Controller
             $request
         );
 
-        return response()->json($response, $response['status_code'] ?? 200);
+        return response()->json($response, $response->httpStatus ?? 200);
     }
 }

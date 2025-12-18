@@ -2,6 +2,7 @@
 
 namespace App\Services\Apilo;
 
+use App\DTO\OrderResult;
 use App\Services\PreviewService;
 use Exception;
 use Illuminate\Support\Collection;
@@ -22,12 +23,16 @@ class OrderService
         $file,
         $notes = null,
         $request = null
-    ): array {
+    ): OrderResult {
 
         try {
+            //dane z formularza
             $generalData = json_decode($generalDataJson, true);
 
+            //produlty z pliku
             $products = $this->previewService->parseCsv($file);
+
+            //dane klienta
             $clientData = $this->previewService->extractClientData($products);
 
             $stockResult = $this->handleStockCheck(
@@ -36,9 +41,12 @@ class OrderService
                 $request->boolean('confirmed_only') ?? false,
                 $request->boolean('ignore_low_stock') ?? false
             );
-            if ($stockResult['status'] !== 'success') {
+
+            if (! $stockResult->success) {
                 return $stockResult;
             }
+
+            return OrderResult::error("TYMCZASOWY KONIEC KODU :D:D:D:D", ['cycki' => 'szczęście']);
 
             $products = collect($stockResult['products']);
 
@@ -48,12 +56,7 @@ class OrderService
             [$items, $totalNet, $totalGross, $errors] = $this->prepareItems($products, $discount, $vat);
 
             if (empty($items)) {
-                return [
-                    'status' => 'error',
-                    'message' => 'Brak prawidłowych produktów w pliku',
-                    'data' => $errors,
-                    'status_code' => 422,
-                ];
+                return OrderResult::error('Brak prawidłowych produktów w pliku', $errors);
             }
 
             $CARRIER_MAP = [
@@ -64,12 +67,7 @@ class OrderService
             $carrierAccountId = $CARRIER_MAP[$generalData['deliveryMethod']] ?? null;
 
             if (! $carrierAccountId) {
-                return [
-                    'status' => 'error',
-                    'message' => 'Nieobsługiwana metoda dostawy',
-                    'data' => [],
-                    'status_code' => 400,
-                ];
+                return OrderResult::error('Nieobsługiwana metoda dostawy', []);
             }
 
             $orderedAt = now()->format('Y-m-d\TH:i:sO');
@@ -98,27 +96,12 @@ class OrderService
             }
 
             if ($response->successful()) {
-                return [
-                    'status' => 'success',
-                    'message' => 'Pomyślnie wysłano zamówienie',
-                    'data' => $response->json(),
-                    'status_code' => $response->status(),
-                ];
+                return OrderResult::success('Pomyślnie wysłano zamówienie', $response->json());
             }
-
-            return [
-                'status' => 'error',
-                'message' => 'Błąd podczas wysyłania zamówienia: ' . $response->body(),
-                'data' => [],
-                'status_code' => $response->status(),
-            ];
+            
+            return OrderResult::error('Błąd podczas wysyłania zamówienia: ' . $response->body());
         } catch (Exception $ex) {
-            return [
-                'status' => 'error',
-                'message' => 'Niespodziewany błąd: ' . $ex->getMessage(),
-                'data' => [],
-                'status_code' => 500,
-            ];
+            return OrderResult::error('Niespodziewany błąd: ' . $ex->getMessage());
         }
     }
 
@@ -249,21 +232,19 @@ class OrderService
         ];
     }
 
-    private function handleStockCheck(array $products, $ignoreMissingSku, $confirmedOnly, $ignoreLowStock): array
+    private function handleStockCheck(array $products, $ignoreMissingSku, $confirmedOnly, $ignoreLowStock): OrderResult
     {
         $stockCheck = $this->stockCheckService->processProductsWithStockCheck($products);
 
-        $confirmed = $stockCheck['confirmed'];
-        $toConfirm = $stockCheck['toConfirm'];
-        $notFound = $stockCheck['notFound'];
+        $confirmed = $stockCheck->confirmed;
+        $toConfirm = $stockCheck->pending;
+        $notFound  = $stockCheck->notFound;
 
         if (! empty($notFound) && ! $ignoreMissingSku) {
-            return [
-                'status' => 'warning',
-                'message' => 'Nie znaleziono części produktów po SKU.',
-                'data' => ['notFound' => $notFound],
-                'status_code' => 409,
-            ];
+            return OrderResult::warning('Nie znaleziono części produktów po SKU.', ['notFound' => array_map(
+                fn($line) => $line->csv->sku,
+                $notFound
+            )]);
         }
 
         if (! empty($toConfirm)) {
@@ -272,23 +253,22 @@ class OrderService
             } elseif ($ignoreLowStock) {
                 $products = array_merge($confirmed, $toConfirm);
             } else {
-                return [
-                    'status' => 'warning',
-                    'message' => 'Niektóre produkty mają zbyt mały stan magazynowy.',
-                    'data' => [
-                        'missingProducts' => $toConfirm,
-                        'confirmedProducts' => $confirmed,
+                return OrderResult::warning('Niektóre produkty mają zbyt mały stan magazynowy.', [
+                        'missingProducts' => array_map(
+                            fn($line) => $line->toApiArray(),
+                            $toConfirm
+                        ),
+                        'confirmedProducts' => array_map(
+                            fn($line) => $line->toApiArray(),
+                            $confirmed
+                        ),
                     ],
-                    'status_code' => 409,
-                ];
+                );
             }
         } else {
             $products = $confirmed;
         }
-
-        return [
-            'status' => 'success',
-            'products' => $products,
-        ];
+        
+        return OrderResult::success('', $products);
     }
 }
