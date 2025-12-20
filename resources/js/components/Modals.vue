@@ -18,7 +18,7 @@ import LowStockModal from './Modals/LowStockModal.vue'
 import MissingProductsModal from './Modals/MissingProductsModal.vue'
 
 defineProps({
-  previewData: Array,
+  previewData: Object,
   lowStockList: Array,
   missingProducts: Array,
   missingMessage: String

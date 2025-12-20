@@ -84,7 +84,7 @@
 import { ref } from 'vue'
 
 defineProps({
-  previewData: { type: Array, default: () => [] }
+  previewData: { type: Object , default: () => [] } 
 })
 
 const viewMode = ref('order')
