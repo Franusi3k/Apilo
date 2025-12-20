@@ -46,9 +46,7 @@ class OrderService
                 return $stockResult;
             }
 
-            return OrderResult::error("TYMCZASOWY KONIEC KODU :D:D:D:D", ['cycki' => 'szczęście']);
-
-            $products = collect($stockResult['products']);
+            $products = collect($stockResult->data);
 
             $discount = (float) ($generalData['discount'] ?? 0.00) / 100.0;
             $vat = (float) ($generalData['vat'] ?? 0.00) / 100.0;
@@ -58,7 +56,8 @@ class OrderService
             if (empty($items)) {
                 return OrderResult::error('Brak prawidłowych produktów w pliku', $errors);
             }
-
+            
+            // zmienicić to na pobieranie z API
             $CARRIER_MAP = [
                 'Eurohermes' => 9,
                 'RohligSuus' => 69,
@@ -98,7 +97,7 @@ class OrderService
             if ($response->successful()) {
                 return OrderResult::success('Pomyślnie wysłano zamówienie', $response->json());
             }
-            
+
             return OrderResult::error('Błąd podczas wysyłania zamówienia: ' . $response->body());
         } catch (Exception $ex) {
             return OrderResult::error('Niespodziewany błąd: ' . $ex->getMessage());
@@ -114,28 +113,27 @@ class OrderService
 
         foreach ($products as $row) {
             try {
-                $product = $row['product'] ?? [];
-                $csv = $row['csv_data'] ?? [];
+                $product = $row->product ?? [];
+                $csv = $row->csv;
 
-                $qty = (int) ($csv['quantity'] ?? 0);
+                $qty = (int)$csv->quantity;
+                $netPrice = parsePrice($csv->netto);
 
-                $netPriceStr = $csv['netto'] ?? '0';
-                $netPrice = parsePrice($netPriceStr);
+                $sku = trim($csv->sku ?? '');
+                $name = trim($product['name'] ?? $csv->name ?? '');
 
-                $sku = trim($product['sku']) ?? '';
-                $name = trim($product['name']) ?? '';
             } catch (\Throwable $e) {
                 $errors[] = "Błąd przetwarzania produktu: {$e->getMessage()}";
+                continue;
             }
 
             if ($sku === '') {
-                $errors[] = "Brak SKU dla produktu: {$name}";
-
+                $errors[] = "Brak SKU dla produktu: $name";
                 continue;
             }
-            if ($qty <= 0) {
-                $errors[] = "Nieprawidłowa ilość dla produktu: {$name} (SKU: {$sku})";
 
+            if ($qty <= 0) {
+                $errors[] = "Nieprawidłowa ilość dla produktu: $name (SKU: $sku)";
                 continue;
             }
 
@@ -159,7 +157,6 @@ class OrderService
                 'unit' => $product['unit'] ?? 'szt.',
             ];
         }
-
         return [$items, $totalNet, $totalGross, $errors];
     }
 
@@ -268,7 +265,7 @@ class OrderService
         } else {
             $products = $confirmed;
         }
-        
+
         return OrderResult::success('', $products);
     }
 }
