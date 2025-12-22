@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\DTO\CsvClientData;
 use App\Services\Csv\CsvReader;
 use App\Services\Csv\CsvOrderRowMapper;
 use App\Services\Csv\CsvClientExtractor;
@@ -22,7 +23,7 @@ class PreviewService
             ->map(fn ($row) => $this->mapper->map($row));
     }
 
-    public function extractClientData(Collection $rows)
+    public function extractClientData(Collection $rows): CsvClientData
     {
         return $this->clientExtractor->extract(
             $rows->first()->client
