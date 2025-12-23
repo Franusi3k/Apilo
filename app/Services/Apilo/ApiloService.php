@@ -21,7 +21,7 @@ class ApiloService
         return $product ? ApiloResult::ok($product, 'Pobrano produkt') : ApiloResult::fail("Brak produktu dla SKU $sku");
     }
 
-    public function updateStockQuantity(string $sku, int $delta): ApiloResult
+    public function updateStockQuantity(string $sku, int $amount): ApiloResult
     {
         $productResponse = $this->fetchProductBySku($sku);
 
@@ -31,11 +31,11 @@ class ApiloService
 
         $product = $productResponse->data;
 
-        $newQty = $this->calculateNewQuantity($product, $delta);
+        $newQty = $this->calculateNewQuantity($product, $amount);
 
         $payload = $this->buildPayload($product, $sku, $newQty);
 
-        $response = $this->client->put('/warehouse/product/', $payload);
+        $response = $this->client->put('rest/api/warehouse/product/', $payload);
 
         if (! $response->successful()) {
             return ApiloResult::fail("Błąd " . $response->status() . ": " . $response->json('message'));
@@ -44,20 +44,22 @@ class ApiloService
         return ApiloResult::ok($response->json());
     }
 
-    private function calculateNewQuantity(array $product, int $delta): int
+    private function calculateNewQuantity(array $product, int $amount): int
     {
-        return ((int) ($product['quantity'] ?? 0)) - $delta;
+        return ((int) ($product['quantity'] ?? 0)) - $amount;
     }
 
     private function buildPayload(array $product, string $sku, int $newQty): array
     {
-        return [[
-            'id' => (int) $product['id'],
-            'sku' => $sku,
-            'quantity' => $newQty,
-            'tax' => (int) ($product['tax'] ?? 0),
-            'status' => (int) ($product['status'] ?? 1),
-            'priceWithTax' => $product['priceWithTax'] ?? null,
-        ]];
+        return [
+            [
+                'id' => (int) $product['id'],
+                'sku' => $sku,
+                'quantity' => $newQty,
+                'tax' => (int) ($product['tax'] ?? 0),
+                'status' => (int) ($product['status'] ?? 1),
+                'priceWithTax' => $product['priceWithTax'] ?? null,
+            ]
+        ];
     }
 }
