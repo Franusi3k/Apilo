@@ -12,20 +12,20 @@ class ApiloService
     {
         $response = $this->client->get('rest/api/warehouse/product', ['sku' => $sku]);
 
-        if (!$response->successful()) {
-            return ApiloResult::fail("Produkt $sku nie znaleziony");
+        if (! $response->successful()) {
+            return ApiloResult::fail("Produkt {$sku} nie znaleziony");
         }
 
         $product = $response->json('products.0');
 
-        return $product ? ApiloResult::ok($product, 'Pobrano produkt') : ApiloResult::fail("Brak produktu dla SKU $sku");
+        return $product ? ApiloResult::ok($product, 'Pobrano produkt') : ApiloResult::fail("Brak produktu dla SKU {$sku}");
     }
 
     public function updateStockQuantity(string $sku, int $amount): ApiloResult
     {
         $productResponse = $this->fetchProductBySku($sku);
 
-        if (!$productResponse->success) {
+        if (! $productResponse->success) {
             return ApiloResult::fail($productResponse->message);
         }
 
@@ -38,7 +38,7 @@ class ApiloService
         $response = $this->client->put('rest/api/warehouse/product/', $payload);
 
         if (! $response->successful()) {
-            return ApiloResult::fail("Błąd " . $response->status() . ": " . $response->json('message'));
+            return ApiloResult::fail('Błąd ' . $response->status() . ': ' . $response->json('message'));
         }
 
         return ApiloResult::ok($response->json());
@@ -59,7 +59,7 @@ class ApiloService
                 'tax' => (int) ($product['tax'] ?? 0),
                 'status' => (int) ($product['status'] ?? 1),
                 'priceWithTax' => $product['priceWithTax'] ?? null,
-            ]
+            ],
         ];
     }
 }

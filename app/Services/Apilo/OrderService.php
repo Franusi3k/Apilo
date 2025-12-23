@@ -4,8 +4,8 @@ namespace App\Services\Apilo;
 
 use App\DTO\OrderResult;
 use App\Services\Apilo\Order\CarrierAccountResolver;
-use App\Services\Apilo\Order\OrderPayloadFactory;
 use App\Services\Apilo\Order\OrderItemBuilder;
+use App\Services\Apilo\Order\OrderPayloadFactory;
 use App\Services\Apilo\Order\OrderStockUpdater;
 use App\Services\PreviewService;
 use Exception;
@@ -80,10 +80,10 @@ class OrderService
                 return OrderResult::error('Błąd podczas wysyłania zamówienia');
             }
 
-            //aktualizacja stanu magazynu
+            // aktualizacja stanu magazynu
             $stockUpdateResult = $this->stockUpdater->updateStock($itemsResult->items);
 
-            if (!$stockUpdateResult) {
+            if (! $stockUpdateResult) {
                 return OrderResult::warning(
                     'Zamówienie zostało utworzone, ale nie udało się zaktualizować stanów magazynowych',
                 );
@@ -101,11 +101,11 @@ class OrderService
 
         $confirmed = $stockCheck->confirmed;
         $toConfirm = $stockCheck->pending;
-        $notFound  = $stockCheck->notFound;
+        $notFound = $stockCheck->notFound;
 
         if (! empty($notFound) && ! $ignoreMissingSku) {
             return OrderResult::warning('Nie znaleziono części produktów po SKU.', ['notFound' => array_map(
-                fn($line) => $line->csv->sku,
+                fn ($line) => $line->csv->sku,
                 $notFound
             )]);
         }
@@ -120,11 +120,11 @@ class OrderService
                     'Niektóre produkty mają zbyt mały stan magazynowy.',
                     [
                         'missingProducts' => array_map(
-                            fn($line) => $line->toApiArray(),
+                            fn ($line) => $line->toApiArray(),
                             $toConfirm
                         ),
                         'confirmedProducts' => array_map(
-                            fn($line) => $line->toApiArray(),
+                            fn ($line) => $line->toApiArray(),
                             $confirmed
                         ),
                     ],

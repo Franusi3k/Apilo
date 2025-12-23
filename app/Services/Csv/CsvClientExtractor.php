@@ -4,6 +4,7 @@ namespace App\Services\Csv;
 
 use App\DTO\CsvClientData;
 use League\ISO3166\ISO3166;
+use Throwable;
 
 class CsvClientExtractor
 {
@@ -25,7 +26,7 @@ class CsvClientExtractor
     {
         try {
             return (new ISO3166)->name($country)['alpha2'] ?? 'PL';
-        } catch (\Throwable) {
+        } catch (Throwable) {
             return 'PL';
         }
     }

@@ -17,17 +17,19 @@ class CreateTokensCommand extends Command
 
     public function handle(): int
     {
-        $authorizationCode = $this->ask("Podaj authorization code z Apilo:");
+        $authorizationCode = $this->ask('Podaj authorization code z Apilo:');
 
-        if (! $authorizationCode || !is_string($authorizationCode)) {
+        if (! $authorizationCode || ! is_string($authorizationCode)) {
             $this->error('Nieprawidłowy kod!');
+
             return Command::FAILURE;
         }
 
         $tokens = $this->authService->exchangeAuthorizationCode($authorizationCode);
 
-        $this->info("Pomyślnie utworzono tokeny:");
+        $this->info('Pomyślnie utworzono tokeny:');
         $this->line(json_encode($tokens, JSON_PRETTY_PRINT));
+
         return Command::SUCCESS;
     }
 }

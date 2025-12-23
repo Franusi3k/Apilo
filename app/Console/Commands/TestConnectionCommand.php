@@ -19,12 +19,14 @@ class TestConnectionCommand extends Command
     {
         $response = $this->client->get('/rest/api');
 
-        if (!$response->successful()) {
-            $this->error("Nie udało się nawiązać połączenia... " . $response->json('message'));
+        if (! $response->successful()) {
+            $this->error('Nie udało się nawiązać połączenia... ' . $response->json('message'));
+
             return Command::FAILURE;
         }
 
-        $this->info("Udało się nawiązać połączenie!");
+        $this->info('Udało się nawiązać połączenie!');
+
         return Command::SUCCESS;
     }
 }

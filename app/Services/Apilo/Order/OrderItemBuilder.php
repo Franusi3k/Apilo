@@ -4,6 +4,7 @@ namespace App\Services\Apilo\Order;
 
 use App\DTO\OrderItemsResult;
 use Illuminate\Support\Collection;
+use Throwable;
 
 class OrderItemBuilder
 {
@@ -19,23 +20,26 @@ class OrderItemBuilder
                 $product = $decision->product ?? [];
                 $csv = $decision->csv;
 
-                $qty = (int)$csv->quantity;
+                $qty = (int) $csv->quantity;
                 $netPrice = parsePrice($csv->netto);
 
                 $sku = trim($csv->sku ?? '');
                 $name = trim($product['name'] ?? $csv->name ?? '');
-            } catch (\Throwable $e) {
+            } catch (Throwable $e) {
                 $errors[] = "Błąd przetwarzania produktu: {$e->getMessage()}";
+
                 continue;
             }
 
             if ($sku === '') {
-                $errors[] = "Brak SKU dla produktu: $name";
+                $errors[] = "Brak SKU dla produktu: {$name}";
+
                 continue;
             }
 
             if ($qty <= 0) {
-                $errors[] = "Nieprawidłowa ilość dla produktu: $name (SKU: $sku)";
+                $errors[] = "Nieprawidłowa ilość dla produktu: {$name} (SKU: {$sku})";
+
                 continue;
             }
 

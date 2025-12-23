@@ -35,7 +35,7 @@ class OrderPayloadFactory
                 'email' => 'shipping@zentrada.com',
                 'streetName' => $clientData->street,
                 'streetNumber' => $clientData->streetNumber,
-                'city' => $clientData->city?? '',
+                'city' => $clientData->city ?? '',
                 'zipCode' => $clientData->postcode ?? '',
                 'country' => $clientData->country ?? '',
                 'companyTaxNumber' => $generalData['taxNumber'] ?? '', // do zmiany

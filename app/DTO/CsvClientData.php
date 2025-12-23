@@ -15,4 +15,3 @@ readonly class CsvClientData
         public string $phone,
     ) {}
 }
-

@@ -22,7 +22,9 @@ class OrderStockUpdater
 
             $result = $this->apiloService->updateStockQuantity($sku, $qty);
 
-            if (!$result->success) $success = false;
+            if (! $result->success) {
+                $success = false;
+            }
         }
 
         return $success;

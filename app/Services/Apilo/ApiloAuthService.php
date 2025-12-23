@@ -4,8 +4,8 @@ namespace App\Services\Apilo;
 
 use Carbon\Carbon;
 use Exception;
-use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Storage;
 
 class ApiloAuthService
 {
@@ -26,9 +26,9 @@ class ApiloAuthService
 
     public function exchangeAuthorizationCode(string $code): array
     {
-        $payload =  [
-            "grantType" => "authorization_code",
-            "token" => $code,
+        $payload = [
+            'grantType' => 'authorization_code',
+            'token' => $code,
         ];
 
         $data = $this->getResponse($payload);
@@ -85,9 +85,9 @@ class ApiloAuthService
     private function makeTokenArray(array $data, ?string $fallbackRefreshToken = null): array
     {
         return [
-            'access_token'  => $data['accessToken'],
+            'access_token' => $data['accessToken'],
             'refresh_token' => $data['refreshToken'] ?? $fallbackRefreshToken,
-            'expires_at'    => $this->calculateExpiresAt($data['accessTokenExpireAt'] ?? null),
+            'expires_at' => $this->calculateExpiresAt($data['accessTokenExpireAt'] ?? null),
         ];
     }
 

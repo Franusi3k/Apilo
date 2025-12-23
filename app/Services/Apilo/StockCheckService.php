@@ -13,7 +13,6 @@ use App\Enums\StockStatus;
  * - pending (za mało na stanie)
  * - notFound (brak lub błąd)
  */
-
 class StockCheckService
 {
     public function __construct(private readonly ApiloService $apiloService) {}
@@ -30,8 +29,8 @@ class StockCheckService
 
             match ($line->status) {
                 StockStatus::CONFIRMED => $confirmed[] = $line,
-                StockStatus::PENDING   => $pending[]   = $line,
-                StockStatus::NOT_FOUND => $notFound[]  = $line,
+                StockStatus::PENDING => $pending[] = $line,
+                StockStatus::NOT_FOUND => $notFound[] = $line,
             };
         }
 
@@ -43,7 +42,7 @@ class StockCheckService
         $sku = $row->sku;
         $requested = $row->quantity;
 
-        if (!$sku) {
+        if (! $sku) {
             return new StockDecision(
                 status: StockStatus::NOT_FOUND,
                 product: null,
@@ -54,7 +53,7 @@ class StockCheckService
 
         $productResponse = $this->apiloService->fetchProductBySku($sku);
 
-        if (!$productResponse->success) {
+        if (! $productResponse->success) {
             return new StockDecision(
                 status: StockStatus::NOT_FOUND,
                 product: null,

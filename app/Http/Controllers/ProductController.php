@@ -13,7 +13,7 @@ class ProductController extends Controller
     {
         $result = $this->apilo->fetchProductBySku($sku);
 
-        if (!$result->success) {
+        if (! $result->success) {
             return response()->json(['message' => $result->message], 404);
         }
 
