@@ -15,10 +15,10 @@ if (! function_exists('safeConvert')) {
 
         try {
             $encoded = mb_convert_encoding($value, 'UTF-8', $encoding);
-        } catch (\ValueError $e) {
+        } catch (ValueError) {
             $encoded = $value;
         }
 
-        return $encoded ?: (string) $value;
+        return $encoded ?: $value;
     }
 }

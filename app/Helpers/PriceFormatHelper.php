@@ -6,14 +6,14 @@ if (! function_exists('parsePrice')) {
      *
      * @param  mixed  $value
      */
-    function parsePrice($value): float
+    function parsePrice(float $value): float
     {
         try {
             $str = strval($value);
             $str = str_replace(['PLN', ','], ['', '.'], $str);
 
             return floatval(trim($str));
-        } catch (\Exception $e) {
+        } catch (Exception) {
             return 0.0;
         }
     }

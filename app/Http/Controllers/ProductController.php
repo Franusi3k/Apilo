@@ -7,7 +7,7 @@ use Symfony\Component\HttpFoundation\JsonResponse;
 
 class ProductController extends Controller
 {
-    public function __construct(private ApiloService $apilo) {}
+    public function __construct(private readonly ApiloService $apilo) {}
 
     public function getProductBySku(string $sku): JsonResponse
     {

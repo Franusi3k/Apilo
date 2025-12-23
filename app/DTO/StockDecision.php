@@ -4,15 +4,15 @@ namespace App\DTO;
 
 use App\Enums\StockStatus;
 
-class StockDecision
+readonly class StockDecision
 {
     public function __construct(
-        public readonly StockStatus $status,
-        public readonly ?array $product,
-        public readonly CsvOrderLine $csv,
-        public readonly ?int $requestedQuantity = null,
-        public readonly ?int $missingQuantity = null,
-        public readonly ?string $reason = null
+        public StockStatus $status,
+        public ?array $product,
+        public CsvOrderLine $csv,
+        public ?int $requestedQuantity = null,
+        public ?int $missingQuantity = null,
+        public ?string $reason = null
     ) {}
 
     public function toApiArray(): array

@@ -1,15 +1,15 @@
 <?php
 
-namespace app\Services\Csv;
+namespace App\Services\Csv;
 
-use App\Services\Csv\CsvDelimiterDetector;
+use Illuminate\Support\Collection;
 use League\Csv\Reader;
 
-class CsvReader
+readonly class CsvReader
 {
     public function __construct(private CsvDelimiterDetector $detector) {}
 
-    public function read($file)
+    public function read($file): Collection
     {
         $content = file_get_contents($file->getRealPath());
         $sample = substr($content, 0, 2048);
@@ -22,4 +22,4 @@ class CsvReader
 
         return collect(iterator_to_array($csv->getRecords()));
     }
-};
+}

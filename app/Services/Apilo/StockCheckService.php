@@ -16,7 +16,7 @@ use App\Enums\StockStatus;
 
 class StockCheckService
 {
-    public function __construct(private ApiloService $apiloService) {}
+    public function __construct(private readonly ApiloService $apiloService) {}
 
     public function processProductsWithStockCheck(array $csvData): StockCheckSummary
     {
@@ -41,7 +41,7 @@ class StockCheckService
     private function processLine(CsvOrderLine $row): StockDecision
     {
         $sku = $row->sku;
-        $requested = (int) $row->quantity;
+        $requested = $row->quantity;
 
         if (!$sku) {
             return new StockDecision(

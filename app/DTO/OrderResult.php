@@ -2,14 +2,14 @@
 
 namespace App\DTO;
 
-class OrderResult
+readonly class OrderResult
 {
     public function __construct(
-        public readonly bool $success,
-        public readonly string $status,
-        public readonly ?string $message = null,
-        public readonly mixed $data = null,
-        public readonly int $httpStatus = 200,
+        public bool $success,
+        public string $status,
+        public ?string $message = null,
+        public mixed $data = null,
+        public int $httpStatus = 200,
     ) {}
 
     public static function success(string $message, mixed $data = null): self

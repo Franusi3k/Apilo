@@ -2,17 +2,17 @@
 
 namespace App\DTO;
 
-class CsvClientData
+readonly class CsvClientData
 {
     public function __construct(
-        public readonly string $name,
-        public readonly string $company,
-        public readonly string $street,
-        public readonly string $streetNumber,
-        public readonly string $postcode,
-        public readonly string $city,
-        public readonly string $country,
-        public readonly string $phone,
+        public string $name,
+        public string $company,
+        public string $street,
+        public string $streetNumber,
+        public string $postcode,
+        public string $city,
+        public string $country,
+        public string $phone,
     ) {}
 }
 

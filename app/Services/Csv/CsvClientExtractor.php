@@ -7,7 +7,7 @@ use League\ISO3166\ISO3166;
 
 class CsvClientExtractor
 {
-    public function extract(array $client)
+    public function extract(array $client): CsvClientData
     {
         return new CsvClientData(
             name: trim("{$client['firstname']} {$client['lastname']}"),
@@ -25,7 +25,7 @@ class CsvClientExtractor
     {
         try {
             return (new ISO3166)->name($country)['alpha2'] ?? 'PL';
-        } catch (\Throwable $e) { 
+        } catch (\Throwable) {
             return 'PL';
         }
     }

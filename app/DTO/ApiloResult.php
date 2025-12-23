@@ -2,12 +2,12 @@
 
 namespace App\DTO;
 
-class ApiloResult
+readonly class ApiloResult
 {
     public function __construct(
-        public readonly bool $success,
-        public readonly ?string $message = null,
-        public readonly mixed $data = null,
+        public bool $success,
+        public ?string $message = null,
+        public mixed $data = null,
     ) {}
 
     public static function ok(mixed $data, ?string $message = null): self

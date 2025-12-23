@@ -2,11 +2,11 @@
 
 namespace App\DTO;
 
-class StockCheckSummary
+readonly class StockCheckSummary
 {
     public function __construct(
-        public readonly array $confirmed,
-        public readonly array $pending,
-        public readonly array $notFound,
+        public array $confirmed,
+        public array $pending,
+        public array $notFound,
     ) {}
 }

@@ -6,7 +6,7 @@ use App\DTO\ApiloResult;
 
 class ApiloService
 {
-    public function __construct(private ApiloClient $client) {}
+    public function __construct(private readonly ApiloClient $client) {}
 
     public function fetchProductBySku(string $sku): ApiloResult
     {

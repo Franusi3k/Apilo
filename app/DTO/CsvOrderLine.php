@@ -2,17 +2,17 @@
 
 namespace App\DTO;
 
-class CsvOrderLine
+readonly class CsvOrderLine
 {
     public function __construct(
-        public readonly string $name,
-        public readonly int $quantity,
-        public readonly float $price,
-        public readonly string $sku,
-        public readonly float $netto,
-        public readonly string $currency,
-        public readonly string $ean,
-        public readonly array $client,
+        public string $name,
+        public int $quantity,
+        public float $price,
+        public string $sku,
+        public float $netto,
+        public string $currency,
+        public string $ean,
+        public array $client,
     ) {}
 
     public static function fromArray(array $data): self

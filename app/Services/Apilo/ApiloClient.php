@@ -9,7 +9,7 @@ class ApiloClient
 {
     private readonly string $baseUrl;
 
-    public function __construct(private ApiloAuthService $authService) 
+    public function __construct(private readonly ApiloAuthService $authService)
     {
         $this->baseUrl = rtrim(config('apilo.base_url'), '/');
     }

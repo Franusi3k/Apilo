@@ -9,7 +9,7 @@ use Symfony\Component\HttpFoundation\JsonResponse;
 
 class PreviewController extends Controller
 {
-    public function __construct(private PreviewService $previewService) {}
+    public function __construct(private readonly PreviewService $previewService) {}
 
     public function preview(Request $request): JsonResponse
     {

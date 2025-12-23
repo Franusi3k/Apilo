@@ -15,12 +15,12 @@ use Symfony\Component\HttpFoundation\File\UploadedFile;
 class OrderService
 {
     public function __construct(
-        private PreviewService $previewService,
-        private ApiloClient $apiloClient,
-        private StockCheckService $stockCheckService,
-        private OrderItemBuilder $itemBuilder,
-        private OrderPayloadFactory $payloadFactory,
-        private OrderStockUpdater $stockUpdater,
+        private readonly PreviewService $previewService,
+        private readonly ApiloClient $apiloClient,
+        private readonly StockCheckService $stockCheckService,
+        private readonly OrderItemBuilder $itemBuilder,
+        private readonly OrderPayloadFactory $payloadFactory,
+        private readonly OrderStockUpdater $stockUpdater,
     ) {}
 
     public function sendOrder(string $generalDataJson, UploadedFile $file, ?string $notes = null, ?Request $request = null): OrderResult

@@ -2,15 +2,13 @@
 
 namespace App\Services\Apilo\Order;
 
-use App\DTO\ApiloResult;
 use App\Services\Apilo\ApiloService;
-use Illuminate\Support\Facades\Log;
 
 class OrderStockUpdater
 {
-    public function __construct(private ApiloService $apiloService) {}
+    public function __construct(private readonly ApiloService $apiloService) {}
 
-    public function updateStock(array $items): bool 
+    public function updateStock(array $items): bool
     {
         $success = true;
 
