@@ -10,18 +10,18 @@ class TestConnectionCommand extends Command
     protected $signature = 'apilo:test-connection';
     protected $description = 'Connection test with API Apilo';
 
-    public function __construct(private ApiloClient $client)
+    public function __construct(private readonly ApiloClient $client)
     {
         parent::__construct();
     }
 
-    public function handle()
+    public function handle(): int
     {
         $response = $this->client->get('/rest/api');
 
         if (!$response->successful()) {
             $this->error("Nie udało się nawiązać połączenia... " . $response->json('message'));
-            return Command::FAILURE;;
+            return Command::FAILURE;
         }
 
         $this->info("Udało się nawiązać połączenie!");

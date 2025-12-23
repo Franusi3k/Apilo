@@ -10,16 +10,16 @@ class CreateTokensCommand extends Command
     protected $signature = 'apilo:tokens-create';
     protected $description = 'Create refresh and access tokens for API authentication';
 
-    public function __construct(private ApiloAuthService $authService)
+    public function __construct(private readonly ApiloAuthService $authService)
     {
         parent::__construct();
     }
 
-    public function handle()
+    public function handle(): int
     {
         $authorizationCode = $this->ask("Podaj authorization code z Apilo:");
 
-        if (! $authorizationCode || $authorizationCode === '' || !is_string($authorizationCode)) {
+        if (! $authorizationCode || !is_string($authorizationCode)) {
             $this->error('Nieprawidłowy kod!');
             return Command::FAILURE;
         }
