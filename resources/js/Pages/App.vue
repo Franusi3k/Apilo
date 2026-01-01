@@ -1,16 +1,21 @@
 <style>
-h1 { color: teal; }
+h1 {
+  color: teal;
+}
 </style>
 
 <template>
   <div class="container py-4">
-    <h1 class="mb-4">🧾 Import zamówień do Apilo</h1>
+    <h1 class="mb-4">Import zamówień do Apilo</h1>
 
     <Alerts :error-message="errorMessage" :success-message="successMessage" />
-  
-    <OrderForm @preview="handlePreview" @success="showSuccess" @error="showError" @missing-products="showMissingProductsModal" @lowStockList="showLowStockListModal" ref="orderForm"/>
 
-    <Modals :preview-data="previewData" :missing-message="missingMessage" :missing-products="missingProducts" @continue-with-found="handleContinueWithoutMissing" @continue-available="handleContinueAvailable" @continue-all="handleContinueAll" :lowStockList="lowStockList"/>
+    <OrderForm @preview="handlePreview" @success="showSuccess" @error="showError"
+      @missing-products="showMissingProductsModal" @lowStockList="showLowStockListModal" ref="orderForm" />
+
+    <Modals :preview-data="previewData" :missing-message="missingMessage" :missing-products="missingProducts"
+      @continue-with-found="handleContinueWithoutMissing" @continue-available="handleContinueAvailable"
+      @continue-all="handleContinueAll" :lowStockList="lowStockList" />
   </div>
 </template>
 

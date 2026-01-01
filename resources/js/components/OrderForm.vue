@@ -1,23 +1,30 @@
 <template>
-  <form class="bg-white p-4 shadow-sm rounded-3 mb-5" @submit.prevent="submitForm()">
+  <form class="bg-white p-4 p-md-5 rounded-4 shadow-sm border mb-5" @submit.prevent="submitForm()">
     <Loading v-model:active="loading" :is-full-page="true" background-color="rgba(0,0,0,0.4)" color="#ffffff"
       loader="spinner" :can-cancel="false" :z-index="9999" :lock-scroll="true" />
 
-    <FileUpload @file-selected="file = $event" @preview="emit('preview', file)" />
-
-    <GeneralData v-model="generalData" />
-
-    <div class="mb-3">
-      <label>Uwagi sprzedawcy:</label>
-      <textarea class="form-control" v-model="notes" rows="3"></textarea>
+    <div class="mb-4 pb-2 border-bottom">
+      <FileUpload @file-selected="file = $event" @preview="emit('preview', file)" />
     </div>
 
     <div class="mb-4">
-      <button type="submit" class="btn btn-primary">📤 Wyślij do Apilo</button>
+      <GeneralData v-model="generalData" />
+    </div>
+
+    <div class="mb-4">
+      <label class="form-label fw-semibold">Uwagi sprzedawcy:</label>
+      <textarea class="form-control rounded-3 shadow-sm" v-model="notes" rows="3"></textarea>
+    </div>
+
+    <div class="d-flex justify-content-end pt-2">
+      <button type="submit" class="btn btn-primary btn-lg rounded-3 px-4 shadow-sm">
+        Wyślij do Apilo
+      </button>
     </div>
   </form>
-
 </template>
+
+
 
 <script setup>
 import { ref } from 'vue'
