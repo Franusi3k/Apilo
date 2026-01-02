@@ -93,10 +93,9 @@ class ApiloAuthService
 
     private function getResponse(array $payload): array
     {
-        $response = Http::post(
-            rtrim(config('apilo.base_url'), '/') . '/rest/auth/token/',
-            $payload
-        );
+        $response = Http::withBasicAuth(config('apilo.client_id'), config('apilo.client_secret'))
+            ->acceptJson()
+            ->post(config('apilo.base_url') . '/rest/auth/token/', $payload);
 
         if (! $response->successful()) {
             throw new Exception('Nie udało się utworzyć tokenów: ' . $response->json('message'));
