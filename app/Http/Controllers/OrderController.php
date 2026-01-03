@@ -12,10 +12,12 @@ class OrderController extends Controller
 
     public function send(SendOrderRequest $request): JsonResponse
     {
+        $validated = $request->validated();
+
         $response = $this->orderService->sendOrder(
-            $request->generalData,
+            $validated['generalData'],
             $request->file('file'),
-            $request->notes,
+            $validated['notes'] ?? null,
             $request
         );
 

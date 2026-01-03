@@ -25,11 +25,9 @@ class OrderService
         private readonly OrderStockUpdater $stockUpdater,
     ) {}
 
-    public function sendOrder(string $generalDataJson, UploadedFile $file, ?string $notes = null, ?Request $request = null): OrderResult
+    public function sendOrder(array $generalData, UploadedFile $file, ?string $notes = null, ?Request $request = null): OrderResult
     {
         try {
-            $generalData = json_decode($generalDataJson, true);
-
             $products = $this->previewService->parseCsv($file);
 
             $clientData = $this->previewService->extractClientData($products);
