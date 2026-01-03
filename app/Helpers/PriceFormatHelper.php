@@ -1,11 +1,6 @@
 <?php
 
 if (! function_exists('parsePrice')) {
-    /**
-     * Parsuje wartość ceny z formatu tekstowego na float
-     *
-     * @param  mixed  $value
-     */
     function parsePrice(float $value): float
     {
         try {

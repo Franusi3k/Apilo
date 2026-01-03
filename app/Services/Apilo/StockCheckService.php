@@ -8,11 +8,12 @@ use App\DTO\StockDecision;
 use App\Enums\StockStatus;
 
 /**
- * Sprawdza dostępność produktów po SKU i dzieli je na 3 grupy:
- * - confirmed (dostępne)
- * - pending (za mało na stanie)
- * - notFound (brak lub błąd)
+ * Checking stock availability products via Apilo API and categorizing them into:
+ * - confirmed (available)
+ * - pending (insufficient stock)
+ * - notFound (missing or error)
  */
+
 class StockCheckService
 {
     public function __construct(private readonly ApiloService $apiloService) {}

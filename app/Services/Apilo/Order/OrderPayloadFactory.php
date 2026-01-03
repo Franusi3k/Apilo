@@ -38,7 +38,7 @@ class OrderPayloadFactory
                 'city' => $clientData->city ?? '',
                 'zipCode' => $clientData->postcode ?? '',
                 'country' => $clientData->country ?? '',
-                'companyTaxNumber' => $generalData['taxNumber'] ?? '', // do zmiany
+                'companyTaxNumber' => $generalData['taxNumber'] ?? '',
                 'companyName' => $clientData->company ?? '',
             ],
             'addressDelivery' => [

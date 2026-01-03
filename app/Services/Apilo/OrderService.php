@@ -80,7 +80,6 @@ class OrderService
                 return OrderResult::error('Błąd podczas wysyłania zamówienia');
             }
 
-            // aktualizacja stanu magazynu
             $stockUpdateResult = $this->stockUpdater->updateStock($itemsResult->items);
 
             if (! $stockUpdateResult) {
