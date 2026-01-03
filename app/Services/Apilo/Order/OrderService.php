@@ -1,12 +1,14 @@
 <?php
 
-namespace App\Services\Apilo;
+namespace App\Services\Apilo\Order;
 
 use App\DTO\OrderResult;
+use App\Services\Apilo\ApiloClient;
 use App\Services\Apilo\Order\CarrierAccountResolver;
 use App\Services\Apilo\Order\OrderItemBuilder;
 use App\Services\Apilo\Order\OrderPayloadFactory;
 use App\Services\Apilo\Order\OrderStockUpdater;
+use App\Services\Apilo\StockCheckService;
 use App\Services\PreviewService;
 use Exception;
 use Illuminate\Http\Request;

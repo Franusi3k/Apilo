@@ -3,7 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Http\Requests\SendOrderRequest;
-use App\Services\Apilo\OrderService;
+use App\Services\Apilo\Order\OrderService;
 use Symfony\Component\HttpFoundation\JsonResponse;
 
 class OrderController extends Controller
