@@ -10,5 +10,3 @@ Route::get('/', function () {
 
 // Endpoint for previewing CSV files
 Route::post('preview', [PreviewController::class, 'preview'])->name('preview.file');
-
-require __DIR__ . '/api.php';
