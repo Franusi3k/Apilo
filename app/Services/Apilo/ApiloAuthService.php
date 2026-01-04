@@ -4,12 +4,13 @@ namespace App\Services\Apilo;
 
 use Carbon\Carbon;
 use Exception;
+use Illuminate\Support\Facades\Crypt;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Storage;
 
 class ApiloAuthService
 {
-    private string $tokenFile = 'apilo_tokens.json';
+    private string $tokenFile = 'private/apilo_tokens.json';
 
     private int $expireMargin = 60;
 
@@ -42,16 +43,22 @@ class ApiloAuthService
 
     private function loadTokens(): array
     {
-        if (! Storage::disk('local')->exists($this->tokenFile)) {
-            throw new Exception('Brak pliku tokens.json!');
-        }
+        $this->ensureTokenFileExists();
 
-        return json_decode(Storage::disk('local')->get($this->tokenFile), true);
+        $encrypted = Storage::disk('local')->get($this->tokenFile);
+
+        $json = Crypt::decryptString($encrypted);
+
+        return json_decode($json, true);
     }
 
     private function saveTokens(array $tokens): void
     {
-        Storage::disk('local')->put($this->tokenFile, json_encode($tokens, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES));
+        $json = json_encode($tokens, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES);
+
+        $encrypted = Crypt::encryptString($json);
+
+        Storage::disk('local')->put($this->tokenFile, $encrypted);
     }
 
     private function refreshAccessToken(string $refreshToken): array
@@ -102,5 +109,12 @@ class ApiloAuthService
         }
 
         return $response->json();
+    }
+
+    private function ensureTokenFileExists(): void
+    {
+        if (! Storage::disk('local')->exists($this->tokenFile)) {
+            Storage::disk('local')->put($this->tokenFile, Crypt::encryptString('{}'));
+        }
     }
 }
