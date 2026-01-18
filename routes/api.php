@@ -4,7 +4,7 @@ use App\Http\Controllers\OrderController;
 use App\Http\Controllers\ProductController;
 use Illuminate\Support\Facades\Route;
 
-Route::middleware('api')->prefix('api')->name('api.')->group(function () {
+Route::middleware('api')->name('api.')->group(function () {
 
     // Endpoint responsible for sending the order
     Route::post('send', [OrderController::class, 'send'])->name('order.send');
