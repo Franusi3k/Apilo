@@ -8,7 +8,7 @@ use App\Services\Csv\CsvOrderRowMapper;
 use App\Services\Csv\CsvReader;
 use Illuminate\Support\Collection;
 
-readonly class PreviewService
+class PreviewService
 {
     public function __construct(
         private CsvReader $reader,

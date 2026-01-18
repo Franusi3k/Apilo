@@ -23,7 +23,7 @@ class PreviewController extends Controller
             $records = $this->previewService->parseCsv($file);
 
             return response()->json($records);
-        } catch (Exception $e) {
+        } catch (\Throwable $e) {
             return response()->json([
                 'error' => 'Błąd przetwarzania pliku: ' . $e->getMessage(),
             ], 500);
