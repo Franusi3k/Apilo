@@ -1,0 +1,9 @@
+{
+  "name": "apilo-launcher",
+  "version": "1.0.0",
+  "private": true,
+  "bin": "launcher.js",
+  "dependencies": {
+    "open": "^9.1.0"
+  }
+}
