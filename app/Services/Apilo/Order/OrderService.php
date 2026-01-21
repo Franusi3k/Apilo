@@ -22,7 +22,6 @@ class OrderService
         private readonly StockCheckService $stockCheckService,
         private readonly OrderItemBuilder $itemBuilder,
         private readonly OrderPayloadFactory $payloadFactory,
-        private readonly OrderStockUpdater $stockUpdater,
     ) {}
 
     public function sendOrder(array $generalData, UploadedFile $file, ?string $notes = null, ?Request $request = null): OrderResult
@@ -74,11 +73,11 @@ class OrderService
                 $orderedAt
             );
 
-            $response = $this->apiloClient->post('rest/api/orders/', $payload);
+            // $response = $this->apiloClient->post('rest/api/orders/', $payload);
 
-            if (! $response->successful()) {
-                return OrderResult::error('Błąd podczas wysyłania zamówienia');
-            }
+            // if (! $response->successful()) {
+            //     return OrderResult::error('Błąd podczas wysyłania zamówienia');
+            // }
 
             return OrderResult::success('Zamówienie zostało wysłane pomyślnie');
         } catch (Exception $ex) {
