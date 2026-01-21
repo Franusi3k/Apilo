@@ -4,7 +4,7 @@ namespace App\Services\Apilo\Order;
 
 use App\Services\Apilo\ApiloService;
 
-// I created that class and whole logic to updating project stock before API added auto stock update on order creation.
+// I created that class and whole logic to updating product stock before API added auto stock update on order creation.
 // So now it's redundant, but I leave it here just in case we need it in the future.
 class OrderStockUpdater
 {
