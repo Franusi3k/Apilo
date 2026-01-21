@@ -4,6 +4,8 @@ namespace App\Services\Apilo\Order;
 
 use App\Services\Apilo\ApiloService;
 
+// I created that class and whole logic to updating project stock before API added auto stock update on order creation.
+// So now it's redundant, but I leave it here just in case we need it in the future.
 class OrderStockUpdater
 {
     public function __construct(private readonly ApiloService $apiloService) {}
@@ -11,22 +13,33 @@ class OrderStockUpdater
     public function updateStock(array $items): bool
     {
         $success = true;
+        $payload = [];
 
         foreach ($items as $item) {
-            $sku = $item['sku'];
-            $qty = (int) $item['quantity'];
+            $product = $item->product ?? null;
+            $csv = $item->csv ?? null;
+            $sku = $csv->sku ?? null;
+            $qty = (int) ($item->requestedQuantity ?? ($csv->quantity ?? 0));
 
-            if (! $sku || $qty <= 0) {
+            if (! $product || ! $sku || $qty <= 0) {
+                $success = false;
                 continue;
             }
 
-            $result = $this->apiloService->updateStockQuantity($sku, $qty);
-
-            if (! $result->success) {
+            if (empty($product['id'])) {
                 $success = false;
+                continue;
             }
+
+            $payload[] = $this->apiloService->createStockPayloadItem($product, $sku, $qty);
         }
 
-        return $success;
+        if ($payload === []) {
+            return $success;
+        }
+
+        $result = $this->apiloService->updateStockQuantities($payload);
+
+        return $result->success && $success;
     }
 }

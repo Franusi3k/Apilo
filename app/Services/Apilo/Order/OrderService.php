@@ -80,14 +80,6 @@ class OrderService
                 return OrderResult::error('Błąd podczas wysyłania zamówienia');
             }
 
-            $stockUpdateResult = $this->stockUpdater->updateStock($itemsResult->items);
-
-            if (! $stockUpdateResult) {
-                return OrderResult::warning(
-                    'Zamówienie zostało utworzone, ale nie udało się zaktualizować stanów magazynowych',
-                );
-            }
-
             return OrderResult::success('Zamówienie zostało wysłane pomyślnie');
         } catch (Exception $ex) {
             return OrderResult::error('Niespodziewany błąd: ' . $ex->getMessage());

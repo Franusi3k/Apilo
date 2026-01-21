@@ -21,19 +21,11 @@ class ApiloService
         return $product ? ApiloResult::ok($product, 'Pobrano produkt') : ApiloResult::fail("Brak produktu dla SKU {$sku}");
     }
 
-    public function updateStockQuantity(string $sku, int $amount): ApiloResult
+    public function updateStockQuantities(array $payload): ApiloResult
     {
-        $productResponse = $this->fetchProductBySku($sku);
-
-        if (! $productResponse->success) {
-            return ApiloResult::fail($productResponse->message);
+        if ($payload === []) {
+            return ApiloResult::ok([]);
         }
-
-        $product = $productResponse->data;
-
-        $newQty = $this->calculateNewQuantity($product, $amount);
-
-        $payload = $this->buildPayload($product, $sku, $newQty);
 
         $response = $this->client->put('rest/api/warehouse/product/', $payload);
 
@@ -44,22 +36,27 @@ class ApiloService
         return ApiloResult::ok($response->json());
     }
 
+    public function createStockPayloadItem(array $product, string $sku, int $amount): array
+    {
+        $newQty = $this->calculateNewQuantity($product, $amount);
+
+        return $this->buildPayloadItem($product, $sku, $newQty);
+    }
+
     private function calculateNewQuantity(array $product, int $amount): int
     {
         return ((int) ($product['quantity'] ?? 0)) - $amount;
     }
 
-    private function buildPayload(array $product, string $sku, int $newQty): array
+    private function buildPayloadItem(array $product, string $sku, int $newQty): array
     {
         return [
-            [
-                'id' => (int) $product['id'],
-                'sku' => $sku,
-                'quantity' => $newQty,
-                'tax' => (int) ($product['tax'] ?? 0),
-                'status' => (int) ($product['status'] ?? 1),
-                'priceWithTax' => $product['priceWithTax'] ?? null,
-            ],
+            'id' => (int) $product['id'],
+            'sku' => $sku,
+            'quantity' => $newQty,
+            'tax' => (int) ($product['tax'] ?? 0),
+            'status' => (int) ($product['status'] ?? 1),
+            'priceWithTax' => $product['priceWithTax'] ?? null,
         ];
     }
 }
