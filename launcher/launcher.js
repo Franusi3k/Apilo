@@ -1,17 +1,16 @@
 const { exec } = require("child_process");
 
-console.log("🚀 Uruchamiam aplikację...");
+console.log("Uruchamiam aplikację...");
 
 exec("docker compose up -d", (err) => {
   if (err) {
-    console.error("❌ Błąd Dockera:", err.message);
+    console.error("Błąd Dockera:", err.message);
     return;
   }
 
-  console.log("✅ Kontenery uruchomione");
-  console.log("🌍 Otwieram przeglądarkę...");
+  console.log("Kontenery uruchomione");
+  console.log("Otwieram przeglądarkę...");
 
-  // Linux / Windows / macOS
   const url = "http://localhost:8080";
 
   const startCmd =
