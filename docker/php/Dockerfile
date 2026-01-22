@@ -8,7 +8,8 @@ RUN apt-get update && apt-get install -y \
     libpng-dev \
     libonig-dev \
     sqlite3 \
-    libsqlite3-dev
+    libsqlite3-dev \
+    ca-certificates
 
 # PHP extensions
 RUN docker-php-ext-install pdo pdo_sqlite zip
