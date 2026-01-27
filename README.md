@@ -1,90 +1,91 @@
-# Apilo Order Importer
+![Apilo logo](docs/images/logo.png)
 
-Tool for importing CSV orders, previewing them, validating stock via Apilo API, and creating orders in Apilo with automatic stock deduction. Frontend is Vue 3 (Inertia) with Bootstrap; backend is Laravel 12.
+# Apilo Order Integration
 
-## Features
-- Upload CSV/TXT  and preview rows in the UI.
-- Validate order payload, check Apilo stock per SKU, warn on missing/low stock, and optionally continue with available items.
-- Create orders in Apilo and decrease stock quantities after success.
-- Fetch product details by SKU.
+This project is a local application built with Laravel and Vue.js.  
+It allows sending orders to Apilo using data from a CSV file.
+
+The application is designed to run locally and does not require any advanced technical knowledge to use.
+
+---
 
 ## Requirements
-- PHP 8.2+, Composer
-- Node 18+ and npm
-- SQLite (default) or another DB if you change `.env`
 
-## Setup
-```bash
-cp .env.example .env
-composer install
-php artisan key:generate
-npm install
-npm run build    # or npm run dev for HMR
-```
+Before running the application, make sure the following software is installed:
 
-Environment variables to set in `.env`:
-- `APP_URL` – base URL for links.
-- `APILO_BASE_URL` – Apilo API base (e.g. `https://example.apilo.com/`).
-- `APILO_CLIENT_ID`, `APILO_CLIENT_SECRET`, `APILO_PLATFORM_ID` – credentials from Apilo.
+- Docker Desktop
+- A web browser (Chrome, Edge, Firefox)
 
-## Getting Apilo tokens
-Run the built-in command and paste the authorization code from Apilo:
-```bash
-php artisan apilo:tokens-create
-```
-Tokens are stored (by default) in `storage/app/apilo_tokens.json`. For production, secure this file or move storage to a safer location/secret manager.
+No PHP, Node.js, or database installation is required.
 
-## Running locally
-```bash
-php artisan serve
-npm run dev      # in another terminal
-```
-UI: `/` (file upload + preview + sending to Apilo)  
-Health: `/up`
+---
 
-## API
-All routes are under `/api` (stateless middleware).
+## How to Run the Application
 
-- `POST /api/send` – send order to Apilo. Multipart form-data:
-  - `file` – CSV/TXT file (10 MB max).
-  - `generalData` – JSON object with:
-    - `client` (string, required)
-    - `phone` (string, required)
-    - `vat` (0–100)
-    - `discount` (0–100)
-    - `deliveryMethod` (`Eurohermes` or `RohligSuus`)
-    - `taxNumber` (string, required)
-  - `notes` – optional string
-  - Optional flags (bool-ish): `ignore_missing_sku`, `confirmed_only`, `ignore_low_stock`
+1. Start Docker Desktop  
+   Docker must be running in the background.
 
-  Responses:
-  - 200 success: `{ status: "success", message: "..." }`
-  - 409 warning (missing/low stock): `{ status: "warning", message, data: { notFound | missingProducts | confirmedProducts } }`
-  - 422 validation errors for malformed payload/JSON.
+2. Run the application  
+   Use the provided launcher file or start script.
 
-- `GET /api/product/{sku}` – fetch product details by SKU.
+3. Open the application in a browser  
+   If the browser does not open automatically, open:
 
-Frontend preview helper:
-- `POST /preview` – multipart `excel_file` (CSV/TXT) returns parsed rows for UI preview.
+   http://localhost:8080
 
-## Frontend flow
-- Upload file → preview modal (`/preview` endpoint).
-- Fill general data (client, VAT, discount, delivery, NIP, phone) + optional notes.
-- Submit → backend validates payload, checks stock, shows modals for missing/low stock, then sends order to Apilo and updates stock.
+On the first start, the application may take up to a few minutes.
 
-## Production hardening (recommended)
-- Secure Apilo tokens storage (encryption/secret manager) and add a lock when refreshing tokens to avoid races.
-- Add auth/rate limiting for the UI/API (currently public if deployed as-is).
-- Add retries/backoff for Apilo API calls; consider batching stock updates.
-- Add logging/monitoring for failed API calls and token refreshes.
+---
 
-## Testing
-Sample tests are not included. Suggested coverage:
-- Validation of `generalData` and file inputs.
-- CSV mapping and client data extraction.
-- Stock check decision branches (confirmed/pending/not found).
-- `/api/send` happy path and warning paths.
+## How the Application Works
 
-## Troubleshooting
-- `Target class [web] does not exist`: ensure `bootstrap/app.php` includes `->withMiddleware(fn ($m) => $m->web()->api());`.
-- Token errors: regenerate with `php artisan apilo:tokens-create` and verify `APILO_*` env vars.
+1. Upload a CSV file with product data.
+2. The application:
+   - Reads and validates the file
+   - Checks product availability
+   - Prepares the order data
+3. The order is sent to Apilo.
+4. The result is displayed as:
+   - Success message
+   - Warning message
+   - Error message
+
+---
+
+## Tokens and Authorization
+
+The application uses Apilo access and refresh tokens.
+
+- Tokens are refreshed automatically
+- No manual action is required during normal use
+
+---
+
+## Tests
+
+The project includes automated tests for:
+
+- Order processing logic
+- CSV preview logic
+- API endpoints
+
+Tests are written using PHPUnit.
+
+---
+
+## Stopping the Application
+
+To stop the application:
+
+- Close the browser tab
+- Stop the Docker containers or close Docker Desktop
+
+---
+
+## Notes
+
+- The application runs locally only
+- An internet connection is required to communicate with Apilo
+- Docker must be running while the application is in use
+
+---
