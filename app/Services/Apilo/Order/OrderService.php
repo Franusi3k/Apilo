@@ -7,7 +7,6 @@ use App\Services\Apilo\ApiloClient;
 use App\Services\Apilo\Order\CarrierAccountResolver;
 use App\Services\Apilo\Order\OrderItemBuilder;
 use App\Services\Apilo\Order\OrderPayloadFactory;
-use App\Services\Apilo\Order\OrderStockUpdater;
 use App\Services\Apilo\StockCheckService;
 use App\Services\PreviewService;
 use Exception;
@@ -33,9 +32,9 @@ class OrderService
 
             $stockResult = $this->handleStockCheck(
                 $products->toArray(),
-                $request->boolean('ignore_missing_sku') ?? false,
-                $request->boolean('confirmed_only') ?? false,
-                $request->boolean('ignore_low_stock') ?? false
+                $request?->boolean('ignore_missing_sku') ?? false,
+                $request?->boolean('confirmed_only') ?? false,
+                $request?->boolean('ignore_low_stock') ?? false
             );
 
             if (! $stockResult->success) {
