@@ -5,7 +5,7 @@ namespace App\Services\Csv;
 use Illuminate\Support\Collection;
 use League\Csv\Reader;
 
-readonly class CsvReader
+class CsvReader
 {
     public function __construct(private CsvDelimiterDetector $detector) {}
 
