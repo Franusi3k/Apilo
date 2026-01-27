@@ -73,11 +73,11 @@ class OrderService
                 $orderedAt
             );
 
-            // $response = $this->apiloClient->post('rest/api/orders/', $payload);
+            $response = $this->apiloClient->post('rest/api/orders/', $payload);
 
-            // if (! $response->successful()) {
-            //     return OrderResult::error('Błąd podczas wysyłania zamówienia');
-            // }
+            if (! $response->successful()) {
+                return OrderResult::error('Błąd podczas wysyłania zamówienia');
+            }
 
             return OrderResult::success('Zamówienie zostało wysłane pomyślnie');
         } catch (Exception $ex) {
