@@ -21,7 +21,6 @@ class OrderItemBuilder
                 $csv = $decision->csv;
 
                 $qty = (int) $csv->quantity;
-                $netPrice = parsePrice($csv->netto);
 
                 $sku = trim($csv->sku ?? '');
                 $name = trim($product['name'] ?? $csv->name ?? '');
@@ -43,11 +42,12 @@ class OrderItemBuilder
                 continue;
             }
 
-            $net = round($netPrice, 2);
-            $vatValue = round($net * $vat, 2);
-            $gross = $net + $vatValue;
+            $netAfterDiscount = round($csv->netto * (1 - $discount), 2);
 
-            $totalNet += $net * $qty;
+            $vatValue = round($netAfterDiscount * $vat, 2);
+            $gross = $netAfterDiscount + $vatValue;
+
+            $totalNet += $netAfterDiscount * $qty;
             $totalGross += $gross * $qty;
 
             $items[] = [
@@ -56,8 +56,8 @@ class OrderItemBuilder
                 'originalCode' => $product['originalCode'] ?? null,
                 'sku' => $sku,
                 'originalName' => $name,
-                'originalPriceWithoutTax' => round($net, 2),
-                'originalPriceWithTax' => round($gross, 2),
+                'originalPriceWithoutTax' => $netAfterDiscount,
+                'originalPriceWithTax' => $gross,
                 'quantity' => $qty,
                 'tax' => round($vat * 100, 2),
                 'type' => '1',

@@ -9,9 +9,9 @@ class CsvOrderRowMapper
     private const MAP = [
         'name' => 1,
         'quantity' => 4,
-        'price' => 5,
+        'price' => 12,
         'sku' => 6,
-        'netto' => 8,
+        'netto' => 11,
         'currency' => 13,
         'ean' => 14,
 

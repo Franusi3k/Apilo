@@ -7,9 +7,9 @@ readonly class CsvOrderLine
     public function __construct(
         public string $name,
         public int $quantity,
-        public string $price,
+        public float $price,
         public string $sku,
-        public string $netto,
+        public float $netto,
         public string $currency,
         public string $ean,
         public array $client,
@@ -20,9 +20,9 @@ readonly class CsvOrderLine
         return new self(
             name: $data['name'],
             quantity: (int) $data['quantity'],
-            price: (string) $data['price'],
-            sku: $data['sku'],
-            netto: (string) $data['netto'],
+            price: self::toFloat($data['price']),
+            sku: (string) $data['sku'],
+            netto: self::toFloat($data['netto']),
             currency: $data['currency'],
             ean: $data['ean'],
             client: [
@@ -37,5 +37,12 @@ readonly class CsvOrderLine
                 'phone' => $data['client_phone'],
             ]
         );
+    }
+    
+    private static function toFloat($v): float
+    {
+        $s = trim((string)$v);
+        $s = str_replace(',', '.', $s);
+        return (float)$s;
     }
 }
