@@ -7,9 +7,9 @@ readonly class CsvOrderLine
     public function __construct(
         public string $name,
         public int $quantity,
-        public float $price,
+        public string $price,
         public string $sku,
-        public float $netto,
+        public string $netto,
         public string $currency,
         public string $ean,
         public array $client,
@@ -20,9 +20,9 @@ readonly class CsvOrderLine
         return new self(
             name: $data['name'],
             quantity: (int) $data['quantity'],
-            price: (float) $data['price'],
+            price: (string) $data['price'],
             sku: $data['sku'],
-            netto: (float) $data['netto'],
+            netto: (string) $data['netto'],
             currency: $data['currency'],
             ean: $data['ean'],
             client: [

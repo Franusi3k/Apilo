@@ -43,11 +43,12 @@ class OrderItemBuilder
                 continue;
             }
 
-            $discountedNet = $netPrice * (1 - $discount);
-            $discountedGross = $discountedNet * (1 + $vat);
+            $net = round($netPrice, 2);
+            $vatValue = round($net * $vat, 2);
+            $gross = $net + $vatValue;
 
-            $totalNet += $discountedNet * $qty;
-            $totalGross += $discountedGross * $qty;
+            $totalNet += $net * $qty;
+            $totalGross += $gross * $qty;
 
             $items[] = [
                 'id' => $product['id'] ?? null,
@@ -55,10 +56,10 @@ class OrderItemBuilder
                 'originalCode' => $product['originalCode'] ?? null,
                 'sku' => $sku,
                 'originalName' => $name,
-                'originalPriceWithTax' => round($discountedGross, 2),
-                'originalPriceWithoutTax' => round($discountedNet, 2),
+                'originalPriceWithoutTax' => round($net, 2),
+                'originalPriceWithTax' => round($gross, 2),
                 'quantity' => $qty,
-                'tax' => number_format($vat * 100, 2),
+                'tax' => round($vat * 100, 2),
                 'type' => '1',
                 'unit' => $product['unit'] ?? 'szt.',
             ];
