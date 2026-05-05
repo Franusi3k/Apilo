@@ -2,69 +2,127 @@
 
 # Apilo Order Integration
 
-This project is a local application built with Laravel and Vue.js.  
-It allows sending orders to Apilo using data from a CSV file.
+A local Laravel + Vue application for sending orders to Apilo from a CSV file.
 
-The application is designed to run locally and does not require any advanced technical knowledge to use.
+The project is designed to run with Docker. You do not need to install PHP, Composer, Node.js, or a database locally.
 
 ---
 
 ## Requirements
 
-Before running the application, make sure the following software is installed:
-
 - Docker Desktop
-- A web browser (Chrome, Edge, Firefox)
-
-No PHP, Node.js, or database installation is required.
-
----
-
-## How to Run the Application
-
-1. Start Docker Desktop  
-   Docker must be running in the background.
-
-2. Run the application  
-   Use the provided launcher file or start script.
-
-3. Open the application in a browser  
-   If the browser does not open automatically, open:
-
-   http://localhost:8080
-
-On the first start, the application may take up to a few minutes.
+- Web browser
+- API credentials from the Apilo panel
 
 ---
 
-## Apilo Account and Authorization
+## First Run
 
-To use this application, an active **Apilo account** is required.
+1. Start Docker Desktop.
 
-### Creating an Authorization Code
+2. Copy the environment file if you do not have a `.env` file yet:
 
-1. Log in to your Apilo account.
-2. Create an API application in the Apilo panel.
-3. Generate an **Authorization Code** for the application.
-4. Copy the Authorization Code. It will be needed to create access tokens.
+```bash
+docker compose run --rm app cp .env.example .env
+```
 
----
+3. Generate the Laravel application key:
 
-## Environment Configuration (.env)
+```bash
+docker compose run --rm app php artisan key:generate
+```
 
-Before creating tokens, the application must be configured.
+4. Fill in the Apilo credentials in `.env`:
 
-1. Open the `.env` file in the project root.
-2. Set the required Apilo credentials:
-
+```env
 APILO_CLIENT_ID=your_client_id
 APILO_CLIENT_SECRET=your_client_secret
 APILO_BASE_URL=https://your-apilo-domain
-APILO_PLATFORM_ID=you_platform_id
+APILO_PLATFORM_ID=your_platform_id
+```
 
-3. Save the file.
+5. Start the application using the dedicated launcher:
 
-Make sure all values are correct before continuing.
+```text
+launcher/Apilo.exe
+```
+
+The launcher starts Docker in the background and opens the application in the browser.
+
+If you prefer using the terminal, you can start it manually:
+
+```bash
+docker compose up --build
+```
+
+During startup, the container installs Composer dependencies, installs Node.js packages, and builds the frontend.
+
+6. Open the application in your browser if it does not open automatically:
+
+```text
+http://localhost:8080
+```
+
+---
+
+## Daily Usage
+
+The recommended way to start the application is the dedicated launcher:
+
+```text
+launcher/Apilo.exe
+```
+
+It starts Docker containers and opens `http://localhost:8080` automatically.
+
+Docker commands are only needed when you want to manage containers manually.
+
+Start the application from the terminal:
+
+```bash
+docker compose up
+```
+
+Start the application in the background:
+
+```bash
+docker compose up -d
+```
+
+Stop the containers:
+
+```bash
+docker compose down
+```
+
+View logs:
+
+```bash
+docker compose logs -f app
+```
+
+Open a shell inside the container:
+
+```bash
+docker compose exec app bash
+```
+
+---
+
+## Apilo Configuration
+
+The integration requires credentials from the Apilo panel:
+
+- `APILO_CLIENT_ID`
+- `APILO_CLIENT_SECRET`
+- `APILO_BASE_URL`
+- `APILO_PLATFORM_ID`
+
+After changing `.env`, clear the Laravel configuration cache:
+
+```bash
+docker compose exec app php artisan config:clear
+```
 
 ---
 
@@ -72,49 +130,42 @@ Make sure all values are correct before continuing.
 
 Tokens are required to communicate with the Apilo API.
 
-To create tokens, run the following command inside the application container or project directory:
+1. Log in to the Apilo panel.
+2. Go to the API Apilo section.
+3. Create an API application.
+4. Generate an Authorization Code.
+5. Run the command:
 
-php artisan apilo:tokens-create
+```bash
+docker compose exec app php artisan apilo:tokens-create
+```
 
-The command will ask for the **Authorization Code** generated in the Apilo panel.
+The command will ask for the Authorization Code.
 
 After successful execution:
-- Access token and refresh token are created
-- Tokens are stored automatically
-- The application is ready to send orders
+
+- an access token is created,
+- a refresh token is created,
+- tokens are saved automatically,
+- the application can communicate with Apilo.
 
 ---
 
-## Tokens Refresh
+## Testing the Apilo Connection
 
-- Access tokens expire automatically
-- Refresh tokens are used to generate new access tokens
-- Token refresh is handled automatically by the application
-- No manual action is required during normal usage
+After creating tokens, test the connection:
 
----
+```bash
+docker compose exec app php artisan apilo:test-connection
+```
 
-## How the Application Works
+A successful response means the application can access the Apilo API.
 
-1. Upload a CSV file with product data.
-2. The application:
-   - Reads and validates the file
-   - Checks product availability
-   - Prepares the order data
-3. The order is sent to Apilo.
-4. The result is displayed as:
-   - Success message
-   - Warning message
-   - Error message
+If the command fails after changing `.env`, clear the Laravel configuration cache:
 
----
-
-## Tokens and Authorization
-
-The application uses Apilo access and refresh tokens.
-
-- Tokens are refreshed automatically
-- No manual action is required during normal use
+```bash
+docker compose exec app php artisan config:clear
+```
 
 ---
 
@@ -128,22 +179,30 @@ The project includes automated tests for:
 
 Tests are written using PHPUnit.
 
+Run tests through Docker:
+
+```bash
+docker compose exec app php artisan test
+```
+
 ---
 
-## Stopping the Application
+## How the Application Works
 
-To stop the application:
-
-- Close the browser tab
-- Stop the Docker containers or close Docker Desktop
+1. The user uploads a CSV file with products.
+2. The application reads and validates the data.
+3. The application checks product availability in Apilo.
+4. The application prepares the order payload.
+5. The order is sent to Apilo.
+6. The result is displayed as a success, warning, or error message.
 
 ---
 
 ## Notes
 
-- The application runs locally only
-- An internet connection is required to communicate with Apilo
-- Docker must be running while the application is in use
-- Apilo tokens must be created before sending orders
-
----
+- The application runs locally at `http://localhost:8080`.
+- Docker must be running while using the application.
+- An internet connection is required to communicate with Apilo.
+- Apilo tokens must be created before sending orders.
+- Use `launcher/Apilo.exe` for normal startup.
+- Run PHP, Artisan, Composer, and Node.js commands through Docker when manual commands are needed.
