@@ -10,7 +10,7 @@ class ApiloService
 
     public function fetchProductBySku(string $sku): ApiloResult
     {
-        $response = $this->client->get('rest/api/warehouse/product', ['sku' => $sku]);
+        $response = $this->client->get('rest/api/warehouse/product/', ['sku' => $sku]);
 
         if (! $response->successful()) {
             return ApiloResult::fail("Produkt {$sku} nie znaleziony");

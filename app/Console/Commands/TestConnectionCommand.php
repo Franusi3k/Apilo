@@ -17,7 +17,7 @@ class TestConnectionCommand extends Command
 
     public function handle(): int
     {
-        $response = $this->client->get('/rest/api');
+        $response = $this->client->get('/rest/api/');
 
         if (! $response->successful()) {
             $this->error('Nie udało się nawiązać połączenia... ' . $response->json('message'));
